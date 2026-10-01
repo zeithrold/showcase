@@ -43,6 +43,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/clock.test.ts",
     "test:e2e": "playwright test",
-    "verify:deployment": "node scripts/verify-deployment.mjs"
+    "verify:deployment": "node scripts/verify-deployment.mjs",
+    "verify:release": "node scripts/verify-release.mjs"
   }
 }
