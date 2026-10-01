@@ -29,18 +29,15 @@ SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 
 ## GitHub Actions
 
-[`CI & Deploy`](https://github.com/zeithrold/showcase/actions/workflows/deploy.yml) runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It installs the pnpm version declared in `package.json`, checks types, runs unit tests, builds the Worker, and runs the full browser suite against that production build. Successful `main` runs then deploy the same build, tag it with the Git commit, and use Cloudflare's authenticated API through Wrangler to verify that this exact commit serves 100% of traffic. Pull requests and manual runs on other branches only run checks. Deployments are queued so an active deployment is not interrupted.
+[`CI & Deploy`](.github/workflows/deploy.yml) runs on pushes to `main` and pull requests targeting `main`. Its **Verify** job checks TypeScript, runs unit tests, builds the Worker, and runs the full browser suite against that production Worker locally. It uploads the verified `dist/` artifact named for the workflow commit. PRs only verify; the verification job has no Cloudflare credentials.
+
+After a successful main push verification, **Deploy** automatically downloads that same run's artifact, checks out the same commit, and deploys it without rebuilding, tagged with the Git SHA. Cloudflare's authenticated API through Wrangler then verifies that this exact commit serves 100% of traffic. There is no manual dispatch, confirmation, enable switch, or expected-SHA input. Stale PR checks are canceled; an active main run is never interrupted, and the latest pending main run waits for it to finish. Browser evidence and verified builds are retained for seven days.
 
 Cloudflare challenges block GitHub-hosted requests to the public site. The CI browser suite runs against the production Worker locally; post-deployment verification checks the active version through Cloudflare's API. From a network accepted by Cloudflare, `pnpm verify:deployment` verifies both public pages and all public bundles, manifests, stylesheets, fonts and icons by SHA-256 against the corresponding `dist/client` build. Public browser tests can also be run with the command above.
 
-Add `CLOUDFLARE_API_TOKEN` in [repository Actions Secrets](https://github.com/zeithrold/showcase/settings/secrets/actions). The account ID and Custom Domain are already in `wrangler.jsonc`; no additional repository variables are required. The token needs these permissions, scoped to the account in that config and the `ztd.me` zone:
+Deployment reuses the existing `CLOUDFLARE_API_TOKEN` repository secret. The account ID, `showcase` Worker, and `showcase.ztd.me` Custom Domain stay in `wrangler.jsonc`; no additional repository variables are required. Credentials and permissions are not changed by the workflow. The token is exposed only to deployment and release verification steps. Missing credentials or permission errors stop deployment without a credential fallback. Local interactive Wrangler authentication is separate from the CI credential.
 
-- Account: Workers Scripts Edit and Account Settings Read.
-- Zone: Workers Routes Edit and Zone Read.
-
-Follow [Cloudflare's CI authentication guide](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) to create the token. Store it only as a GitHub secret, never in source. The workflow exposes it only to deployment and release verification steps. Local interactive Wrangler authentication is separate from the CI credential.
-
-Failed browser tests retain their traces as a workflow artifact for seven days. All dependency, build, test, and deployment commands use pnpm.
+All dependency, build, test, and deployment commands use pnpm. Reviewing a PR runs verification only. Merging it into main triggers automatic deployment after verification passes.
 
 ## Pages
 
