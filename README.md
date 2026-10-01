@@ -29,7 +29,9 @@ SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 
 ## GitHub Actions
 
-[`CI & Deploy`](https://github.com/zeithrold/showcase/actions/workflows/deploy.yml) runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It installs the pnpm version declared in `package.json`, checks types, runs unit tests, builds the Worker, and runs the browser suite against that production build. Successful `main` runs then deploy the same build and verify the live site. Pull requests and manual runs on other branches only run checks. Deployments are queued so an active deployment is not interrupted.
+[`CI & Deploy`](https://github.com/zeithrold/showcase/actions/workflows/deploy.yml) runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It installs the pnpm version declared in `package.json`, checks types, runs unit tests, builds the Worker, and runs the full browser suite against that production build. Successful `main` runs then deploy the same build and verify both live pages and every public bundle, manifest, stylesheet, font and icon by SHA-256. Pull requests and manual runs on other branches only run checks. Deployments are queued so an active deployment is not interrupted.
+
+Cloudflare browser challenges block GitHub-hosted Chromium from loading the public site. The CI browser suite runs against the production Worker locally; post-deployment verification uses HTTP responses and exact asset hashes. `pnpm verify:deployment` requires the corresponding `dist/client` build. Browser tests against the public site can still be run from a network accepted by Cloudflare with the command above.
 
 Add `CLOUDFLARE_API_TOKEN` in [repository Actions Secrets](https://github.com/zeithrold/showcase/settings/secrets/actions). The account ID and Custom Domain are already in `wrangler.jsonc`; no additional repository variables are required. The token needs these permissions, scoped to the account in that config and the `ztd.me` zone:
 

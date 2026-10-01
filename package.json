@@ -42,6 +42,7 @@
     "deploy": "pnpm build && wrangler deploy --config dist/server/wrangler.json",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/clock.test.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:deployment": "node scripts/verify-deployment.mjs"
   }
 }

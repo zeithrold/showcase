@@ -72,7 +72,7 @@ jobs:
         if: steps.deploy.outcome == 'success'
         env:
           SHOWCASE_TEST_URL: https://showcase.ztd.me
-        run: pnpm test:e2e
+        run: pnpm verify:deployment
 
       - name: Upload failure traces
         if: failure()
