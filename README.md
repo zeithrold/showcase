@@ -27,7 +27,11 @@ To check the deployed site with the same browser suite:
 SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 ```
 
-## First tool: Time, in motion
+## Pages
+
+The homepage is a directory of individual pages. `lib/pages.ts` defines the page list, currently linking to the clock at [`/clock`](https://showcase.ztd.me/clock). Each new tool gets its own route and directory entry. Language, theme, and palette settings are shared across pages and saved in browser storage.
+
+## First tool: Time, in motion (`/clock`)
 
 - Every changed digit slides upward independently; unchanged digits stay still.
 - Local time and six selectable timezones; 12/24-hour format and optional seconds.
@@ -37,4 +41,4 @@ SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 - English and Simplified Chinese with i18next/react-i18next, browser language detection, localized dates, and saved language preference.
 - Five complete color palettes (Terracotta, Moss, Ocean, Plum, Graphite), each with light/dark variants.
 
-`components/sliding-digit.tsx` implements the motion. `components/showcase.tsx` contains the page and clock controls. `lib/clock.ts` contains timezone formatting and preference validation. Translation resources live in `lib/locales/`; `components/i18n-provider.tsx` creates an isolated i18next instance for each rendered app. Tests cover rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, localization, all color palettes, zero glyph clipping, and responsive layouts.
+`components/page-directory.tsx` renders the homepage. `components/site-shell.tsx` supplies shared navigation; `components/preferences-provider.tsx` owns saved preferences. `components/sliding-digit.tsx` implements the motion and `components/clock-page.tsx` contains the clock page and controls. `lib/clock.ts` contains timezone formatting and preference validation. Translation resources live in `lib/locales/`; `components/i18n-provider.tsx` creates an isolated i18next instance for each rendered app. Tests cover directory navigation, cross-page preferences, rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, localization, all color palettes, zero glyph clipping, and responsive layouts.

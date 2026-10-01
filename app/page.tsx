@@ -1,5 +1,5 @@
-import { Showcase } from "@/components/showcase";
+import { PageDirectory } from "@/components/page-directory";
 
 export default function Home() {
-  return <Showcase />;
+  return <PageDirectory />;
 }

@@ -11,7 +11,7 @@ async function openClock(page: Page, time = instant) {
       sessionStorage.setItem("showcase-test-seeded", "true");
     }
   });
-  await page.goto("/");
+  await page.goto("/clock");
   await expect(page.locator("time.clock-digits")).toHaveAttribute("aria-label", `${time.toISOString().slice(11, 19)}, UTC`);
 }
 
@@ -95,7 +95,7 @@ for (const viewport of [{ width: 1440, height: 1100 }, { width: 390, height: 844
 
 test("live clock advances using real browser timers", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto("/");
+  await page.goto("/clock");
   await expect(page.locator("time.clock-digits")).toHaveAttribute("aria-label", /^\d{2}:\d{2}:\d{2}/);
   const timestamp = await page.locator("time.clock-digits").getAttribute("datetime");
   await expect.poll(() => page.locator("time.clock-digits").getAttribute("datetime")).not.toBe(timestamp);
@@ -110,7 +110,7 @@ test("language switch translates dates, controls, accessible labels, and persist
   await page.getByRole("combobox", { name: "Language", exact: true }).click();
   await page.getByRole("option", { name: "简体中文" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
-  await expect(page.locator("h1")).toContainText("细节，恰到好处。");
+  await expect(page.locator("h1")).toContainText("让时间，轻轻流动");
   await expect(page.locator(".clock-date")).toContainText("2026年10月1日");
   await page.getByRole("button", { name: "12 小时", exact: true }).click();
   await expect(page.locator("time.clock-digits")).toHaveAttribute("aria-label", "UTC，下午 03:59:58");
@@ -209,7 +209,7 @@ test("fresh Chinese visitors use their browser language without a hydration mism
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
-  await page.goto(test.info().project.use.baseURL ?? "http://localhost:4173");
+  await page.goto(new URL("/clock", test.info().project.use.baseURL ?? "http://localhost:4173").href);
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
   await expect(page.getByRole("combobox", { name: "时区", exact: true })).toHaveText("本地时间");
   await expect(page.locator(".clock-location")).toContainText("上海");

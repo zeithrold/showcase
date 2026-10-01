@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ShowcaseI18nProvider } from "@/components/i18n-provider";
+import { PreferencesProvider } from "@/components/preferences-provider";
 
 export const metadata: Metadata = {
   title: "zeithrold/showcase",
-  description: "A personal collection of thoughtful interfaces and useful little tools by Zeithrold. First up: a clock that puts time in motion.",
+  description: "Explore Zeithrold's collection of frontend design experiments and useful everyday tools, one page at a time.",
   metadataBase: new URL("https://showcase.ztd.me"),
   icons: { icon: "/favicon.svg" },
   openGraph: {
     title: "zeithrold/showcase",
-    description: "Small tools. Thoughtful details. A personal collection of interfaces, starting with a clock in motion.",
+    description: "Explore Zeithrold's collection of frontend design experiments and useful everyday tools, one page at a time.",
     url: "https://showcase.ztd.me",
     type: "website",
   },
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body><ShowcaseI18nProvider>{children}</ShowcaseI18nProvider></body>
+      <body><ShowcaseI18nProvider><PreferencesProvider>{children}</PreferencesProvider></ShowcaseI18nProvider></body>
     </html>
   );
 }
