@@ -27,6 +27,19 @@ To check the deployed site with the same browser suite:
 SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 ```
 
+## GitHub Actions
+
+[`CI & Deploy`](https://github.com/zeithrold/showcase/actions/workflows/deploy.yml) runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It installs the pnpm version declared in `package.json`, checks types, runs unit tests, builds the Worker, and runs the browser suite against that production build. Successful `main` runs then deploy the same build and verify the live site. Pull requests and manual runs on other branches only run checks. Deployments are queued so an active deployment is not interrupted.
+
+Add `CLOUDFLARE_API_TOKEN` in [repository Actions Secrets](https://github.com/zeithrold/showcase/settings/secrets/actions). The account ID and Custom Domain are already in `wrangler.jsonc`; no additional repository variables are required. The token needs these permissions, scoped to the account in that config and the `ztd.me` zone:
+
+- Account: Workers Scripts Edit and Account Settings Read.
+- Zone: Workers Routes Edit and Zone Read.
+
+Follow [Cloudflare's CI authentication guide](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) to create the token. Store it only as a GitHub secret, never in source. The workflow exposes it only to the deployment step. Local interactive Wrangler authentication is separate from the CI credential.
+
+Failed browser tests retain their traces as a workflow artifact for seven days. All dependency, build, test, and deployment commands use pnpm.
+
 ## Pages
 
 The homepage is a directory of individual pages. `lib/pages.ts` defines the page list, currently linking to the clock at [`/clock`](https://showcase.ztd.me/clock). Each new tool gets its own route and directory entry. Language, theme, and palette settings are shared across pages and saved in browser storage.
