@@ -34,5 +34,7 @@ SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 - Day progress, three world clocks, clipboard copy, fullscreen, and light/dark themes.
 - Preferences persist in browser storage, with validation and graceful handling of unavailable storage.
 - Keyboard-accessible Shadcn controls and support for reduced motion.
+- English and Simplified Chinese with i18next/react-i18next, browser language detection, localized dates, and saved language preference.
+- Five complete color palettes (Terracotta, Moss, Ocean, Plum, Graphite), each with light/dark variants.
 
-`components/sliding-digit.tsx` implements the motion. `components/showcase.tsx` contains the page and clock controls. `lib/clock.ts` contains timezone formatting and preference validation. Tests cover rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, and responsive layouts.
+`components/sliding-digit.tsx` implements the motion. `components/showcase.tsx` contains the page and clock controls. `lib/clock.ts` contains timezone formatting and preference validation. Translation resources live in `lib/locales/`; `components/i18n-provider.tsx` creates an isolated i18next instance for each rendered app. Tests cover rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, localization, all color palettes, zero glyph clipping, and responsive layouts.

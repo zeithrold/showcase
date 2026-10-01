@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getClockParts, formatClock, readPreferences, DEFAULT_PREFERENCES } from "../lib/clock.ts";
+import { detectLocale } from "../lib/i18n.ts";
 
 test("midnight and noon use correct 12-hour periods", () => {
   assert.equal(formatClock(new Date("2026-10-01T00:00:00Z"), "UTC", "12", true), "12:00:00 AM");
@@ -28,5 +29,27 @@ test("corrupt or unrecognized persisted preferences cannot break the clock", () 
   for (const value of [null, "invalid", [], { timezone: "Mars/Unknown", format: "13", seconds: "false", theme: "purple" }]) {
     assert.deepEqual(readPreferences(value), DEFAULT_PREFERENCES);
   }
-  assert.deepEqual(readPreferences({ timezone: "UTC", format: "12", seconds: false, theme: "dark" }), { timezone: "UTC", format: "12", seconds: false, theme: "dark" });
+  assert.deepEqual(readPreferences({ timezone: "UTC", format: "12", seconds: false, theme: "dark" }), { ...DEFAULT_PREFERENCES, timezone: "UTC", format: "12", seconds: false, theme: "dark" });
+});
+
+test("existing preferences migrate without resetting time controls", () => {
+  assert.deepEqual(readPreferences({ timezone: "Asia/Tokyo", format: "12", seconds: false, theme: "dark" }, "zh-CN"), {
+    timezone: "Asia/Tokyo", format: "12", seconds: false, theme: "dark", locale: "zh-CN", palette: "terracotta",
+  });
+  assert.equal(readPreferences({ locale: "unknown", palette: "unknown" }, "zh-CN").locale, "zh-CN");
+  assert.equal(readPreferences({ locale: "en", palette: "ocean" }, "zh-CN").palette, "ocean");
+});
+
+test("browser language preference order and unsupported language fallback", () => {
+  assert.equal(detectLocale(["zh-TW", "en-US"]), "zh-CN");
+  assert.equal(detectLocale(["fr-FR", "zh-CN"]), "zh-CN");
+  assert.equal(detectLocale(["en-GB", "zh-CN"]), "en");
+  assert.equal(detectLocale(["ja-JP"]), "en");
+});
+
+test("Chinese dates and 12-hour clipboard values follow the chosen locale", () => {
+  const date = new Date("2026-10-01T16:00:00Z");
+  assert.match(getClockParts(date, "Asia/Shanghai", "24", "zh-CN").dateLabel, /2026年10月2日/);
+  assert.equal(formatClock(date, "UTC", "12", false, "zh-CN"), "下午 04:00");
+  assert.equal(formatClock(date, "UTC", "24", true, "zh-CN"), "16:00:00");
 });
