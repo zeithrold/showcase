@@ -1,5 +1,6 @@
-import { PageDirectory } from "@/components/page-directory";
+import type { JSX } from 'react'
+import { PageDirectory } from '@/components/page-directory'
 
-export default function Home() {
-  return <PageDirectory />;
+export default function Home(): JSX.Element {
+  return <PageDirectory />
 }

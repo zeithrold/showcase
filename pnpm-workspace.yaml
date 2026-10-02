@@ -1,8 +1,13 @@
+minimumReleaseAgeExclude:
+  - '@ztd-me/eslint'
+
 packages:
   - .
+
+overrides:
+  # Keep vinext's optional OG renderer on the patched ZIP decoder.
+  fflate@>=0.7.0 <0.7.5: 0.7.5
+
 onlyBuiltDependencies:
   - esbuild
   - workerd
-overrides:
-  # Keep vinext's optional OG renderer on the patched ZIP decoder.
-  "fflate@>=0.7.0 <0.7.5": "0.7.5"

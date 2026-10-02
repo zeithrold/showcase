@@ -1,5 +1,6 @@
-import { ClockPage } from "@/components/clock-page";
+import type { JSX } from 'react'
+import { ClockPage } from '@/components/clock-page'
 
-export default function Clock() {
-  return <ClockPage />;
+export default function Clock(): JSX.Element {
+  return <ClockPage />
 }

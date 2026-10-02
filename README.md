@@ -11,6 +11,7 @@ Use **pnpm only**. Node.js 24 and pnpm 10.33.0 are used for this project.
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
+pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
@@ -29,7 +30,7 @@ SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 
 ## GitHub Actions
 
-[`CI & Deploy`](.github/workflows/deploy.yml) runs on pushes to `main` and pull requests targeting `main`. Its **Verify** job checks TypeScript, runs unit tests, builds the Worker, and runs the full browser suite against that production Worker locally. It uploads the verified `dist/` artifact named for the workflow commit. PRs only verify; the verification job has no Cloudflare credentials.
+[`CI & Deploy`](.github/workflows/deploy.yml) runs on pushes to `main` and pull requests targeting `main`. Its **Verify** job lints with zero warnings, checks TypeScript, runs unit tests, builds the Worker, and runs the full browser suite against that production Worker locally. It uploads the verified `dist/` artifact named for the workflow commit. PRs only verify; the verification job has no Cloudflare credentials.
 
 After a successful main push verification, **Deploy** automatically downloads that same run's artifact, checks out the same commit, and deploys it without rebuilding, tagged with the Git SHA. Cloudflare's authenticated API through Wrangler then verifies that this exact commit serves 100% of traffic. There is no manual dispatch, confirmation, enable switch, or expected-SHA input. Stale PR checks are canceled; an active main run is never interrupted, and the latest pending main run waits for it to finish. Browser evidence and verified builds are retained for seven days.
 
@@ -53,4 +54,6 @@ The homepage is a directory of individual pages. `lib/pages.ts` defines the page
 - English and Simplified Chinese with i18next/react-i18next, browser language detection, localized dates, and saved language preference.
 - Five complete color palettes (Terracotta, Moss, Ocean, Plum, Graphite), each with light/dark variants.
 
-`components/page-directory.tsx` renders the homepage. `components/site-shell.tsx` supplies shared navigation; `components/preferences-provider.tsx` owns saved preferences. `components/sliding-digit.tsx` implements the motion and `components/clock-page.tsx` contains the clock page and controls. `lib/clock.ts` contains timezone formatting and preference validation. Translation resources live in `lib/locales/`; `components/i18n-provider.tsx` creates an isolated i18next instance for each rendered app. Tests cover directory navigation, cross-page preferences, rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, localization, all color palettes, zero glyph clipping, and responsive layouts.
+The published `@ztd-me/eslint@0.1.0` config enables strict, type-aware TypeScript and React checks. `eslint.config.js` excludes generated build and framework files only; application, configuration, verification scripts, and tests are linted. TypeScript enables `strict` and `noUncheckedIndexedAccess`. ESLint 10.11.0 and TypeScript 6.0.3 are pinned to the package's declared peer versions.
+
+`components/page-directory.tsx` renders the homepage. `components/site-shell.tsx` supplies shared navigation; `components/preferences-provider.tsx` synchronizes saved preferences through the per-app store in `lib/preferences-store.ts`, with a stable server snapshot for hydration. `components/sliding-digit.tsx` implements the motion and `components/clock-page.tsx` composes the clock view and controls from `components/clock/`; `lib/use-current-time.ts` owns the synchronized timer and visibility subscription, and `lib/use-clock-actions.ts` owns clipboard status and fullscreen behavior. `lib/clock.ts` contains timezone formatting and preference validation. Translation resources live in `lib/locales/`; `components/i18n-provider.tsx` creates an isolated i18next instance for each rendered app. Tests cover directory navigation, cross-page preferences, rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, localization, all color palettes, zero glyph clipping, and responsive layouts.
