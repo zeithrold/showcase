@@ -1,3 +1,7 @@
+minimumReleaseAgeExcludePrune: true
+trustPolicy: no-downgrade
+shellEmulator: true
+
 minimumReleaseAgeExclude:
   - '@ztd-me/eslint'
 
@@ -8,6 +12,6 @@ overrides:
   # Keep vinext's optional OG renderer on the patched ZIP decoder.
   fflate@>=0.7.0 <0.7.5: 0.7.5
 
-onlyBuiltDependencies:
-  - esbuild
-  - workerd
+allowBuilds:
+  esbuild: true
+  workerd: true
