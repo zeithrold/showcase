@@ -43,7 +43,7 @@
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",
     "@vitejs/plugin-rsc": "latest",
-    "@ztd-me/eslint": "0.1.0",
+    "@ztd-me/eslint": "0.1.1",
     "eslint": "10.11.0",
     "tailwindcss": "latest",
     "typescript": "6.0.3",
