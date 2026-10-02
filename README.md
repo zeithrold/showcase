@@ -20,7 +20,7 @@ pnpm test:e2e
 pnpm deploy
 ```
 
-`pnpm check` runs lint, type checking, unit tests, the build, and the browser suite in order (install Chromium first). The workspace enables pnpm's portable shell, release-age exclusion pruning, and `trustPolicy: no-downgrade`; only `@ztd-me/eslint` is exempted from the release-age gate. Build-script permission remains limited to `esbuild` and `workerd` through pnpm 11's `allowBuilds` configuration.
+`pnpm check` runs lint, type checking, unit tests, the build, and the browser suite in order (install Chromium first). The workspace enables pnpm's portable shell, release-age exclusion pruning, and `trustPolicy: no-downgrade`; only `@ztd-me/eslint` is exempted from the release-age gate. The approved trust exception covers only `semver@6.3.1`, which Babel 7 requires and which lacks provenance. Build-script permission remains limited to `esbuild` and `workerd` through pnpm 11's `allowBuilds` configuration.
 
 `pnpm start` serves the production Worker locally. `pnpm deploy` builds and deploys the Worker and its `showcase.ztd.me` Custom Domain, using your Wrangler authentication. `wrangler.jsonc` is the source deployment configuration; `dist/server/wrangler.json` is generated during build.
 
