@@ -4,10 +4,10 @@ Source baseline: `a1ef35eb111bd53dedc083b965f30fb4e0ecfee1` (current main after 
 Preparation branch: `chore/shared-frontend-migration`.
 
 The stable contract is verified at tools source
-`7f9401ae1aae60ceb130670a9ce427f4d643df96`: [consumer README](https://github.com/zeithrold/tools/blob/7f9401ae1aae60ceb130670a9ce427f4d643df96/packages/frontend/README.md),
+`20fd45036ba6a723d061afc5be2e928ab64157c9`: [consumer README](https://github.com/zeithrold/tools/blob/20fd45036ba6a723d061afc5be2e928ab64157c9/packages/frontend/README.md),
 [draft PR #8](https://github.com/zeithrold/tools/pull/8) and
-[six passing CI jobs](https://github.com/zeithrold/tools/actions/runs/37033312032).
-The owner must still merge, stage and promote the package, followed by the registry smoke check.
+[six passing CI jobs](https://github.com/zeithrold/tools/actions/runs/37040530960).
+The owner must still merge, stage and promote frontend 0.1.0 and frontend-checks 0.1.1, followed by both registry smoke checks.
 This preparation adds no dependency placeholder, local shared-shell implementation or vendored artifact.
 
 ## Approved target
@@ -70,13 +70,17 @@ production Worker value and overrides local `pnpm start` to development. This us
 Node compatibility behavior documented in [Cloudflare environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/#environment-variables-and-nodejs-compatibility).
 No deployment route, credential, grant, CSP or CI deployment guard is changed.
 
-The patch's syntax and clean application are checked; its package-backed types/build/browser behavior
-remain unrun. After the parent's public-registry smoke succeeds, inspect the promoted package again,
-install its exact verified version with pnpm, apply the patch and complete the verification checklist.
-Existing browser selectors must move from palette buttons/theme toggles to the actual shared
-appearance menu and from old root attributes to `data-frontend-mode`/`data-frontend-palette`.
-Add consumer SSR/cache, system-mode, sharing/isolation, recovery and fullscreen-menu regressions.
-Then remove obsolete chrome CSS and any redundant dependencies using the actual published lockfile.
+The corrected patch passes all native gates against exact-source packed candidates in a disposable
+checkout. It includes adapted browser selectors, root attributes and regressions for SSR/cache,
+system mode, cookie/legacy precedence, local cookie isolation, denied storage/recovery, fullscreen
+menus and compact mobile project controls. It preserves Pages and About in a toolbar below the
+shared header on narrow screens; both controls remain visible and usable. The dark Tailwind variant
+uses the server-rendered mode attributes and the fixed frontend-checks 0.1.1 custom-variant support.
+
+After the parent's public-registry smoke succeeds for both packages, inspect their promoted artifacts,
+install the exact verified versions with pnpm, apply the patch and repeat final verification.
+Production sharing/preview deployment behavior and final published dependencies still require their
+consumer checks. Remove obsolete chrome CSS and redundant dependencies using the real registry lockfile.
 
 ## Verification checklist
 
@@ -95,7 +99,8 @@ Then remove obsolete chrome CSS and any redundant dependencies using the actual 
 The current preparation regressions cover clock-only legacy validation, separation from private
 and appearance fields, all supported timezones, independent app stores, clock preservation when
 appearance/locale changes, and project-only header navigation. Cross-site sharing, neutral/system
-behavior and package integration tests depend on the published contract and are not yet run.
+behavior have now been exercised in the packed candidate checkout as recorded below. Final public-registry
+installation and deployment-specific sharing checks remain pending.
 
 ## Preparation validation
 
@@ -111,6 +116,40 @@ This validates the preparation against current dependencies. Package integration
 sharing/default-mode behavior still require the verified published contract, a fresh frozen
 install, final checks and exact-head PR CI. The deployment workflow and dependency protections
 are unchanged; deployment remains restricted to this repository's main-branch push events.
+
+## Exact-source packed candidate revalidation
+
+Tools source `20fd45036ba6a723d061afc5be2e928ab64157c9` was downloaded through its exact commit
+archive and packed without source changes. Frontend 0.1.0 and frontend-checks 0.1.1 were installed
+only in a disposable Showcase checkout at baseline `1376fee9dc0243ec1edd05d0206854209854d294`.
+Both source installs and the packed consumer's subsequent frozen install passed with age, integrity,
+no-downgrade and build restrictions intact. The independent consumer uses unpatched Radix dependencies.
+
+All seven native gates pass: zero-warning ESLint, CSS lint, type checks, 22 unit tests, production
+Worker build, 46 Chromium regressions and seven accessibility scenarios covering 33 complete Axe
+scans with zero violations. The failure-evidence probe passes. A CSS negative control still rejects
+an unscoped nesting selector outside `custom-variant`, confirming that the compatibility allowance
+has not disabled the native rule.
+
+Coverage includes denied cookie reads/writes plus denied localStorage on desktop and mobile;
+recovery through focus; preserved SSR appearance/locale and usable clock controls; optional mirror
+failure with successful cookie persistence; language-dependent SSR and private/no-store cache
+behavior; system-dark content/colors before application JavaScript; OS changes and explicit-mode
+independence; all six palettes in both modes; legacy clock preservation; future-cookie retention;
+local isolation from production cookie names and forwarded hosts; keyboard focus and fullscreen
+appearance portals. Visual review caught an overly tall mobile brand layout; consumer project
+controls now move below the shared header at narrow widths, with height and interaction regressions.
+
+No package contract blocker remains. The adapter's synchronous-effect state update, nested ternary,
+CSS specificity/order errors and keyboard-test timing were corrected without weakening policy.
+The persistent application, dependency manifest/lockfile, runtime configuration and workflow are
+unchanged; only the unapplied patch and verification evidence are updated.
+
+See `docs/shared-frontend-candidate-verification.json` for archive SHA-256/SHA-512, native statuses,
+browser statistics and the tested patch checksum. Reports, captures, scans, logs, trace/video
+failure-probe evidence and the negative control remain under `.zt/artifacts/frontend-candidate-20fd4503`.
+These checks establish packed-candidate compatibility; they do not clear owner promotion or final
+public-registry smoke requirements. No candidate tarball or disposable lockfile is committed.
 
 All repository documentation, commit and PR text is English; supported application translations
 remain bilingual. No merges, manual deployment, credential changes or npm promotion are part of

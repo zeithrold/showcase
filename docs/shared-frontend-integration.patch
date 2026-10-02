@@ -1,10 +1,16 @@
 diff --git a/app/globals.css b/app/globals.css
-index 152ab23..bad062f 100644
+index 152ab23..a462449 100644
 --- a/app/globals.css
 +++ b/app/globals.css
-@@ -3,14 +3,6 @@
+@@ -1,14 +1,16 @@
+ @import url("tailwindcss");
+ @import url("tw-animate-css");
 
- @custom-variant dark (&:is(.dark *));
+-@custom-variant dark (&:is(.dark *));
++@custom-variant dark {
++  &:where([data-frontend-mode="dark"], [data-frontend-mode="dark"] *) {
++    @slot;
++  }
 
 -@font-face {
 -  font-family: "Inter Variable";
@@ -12,12 +18,15 @@ index 152ab23..bad062f 100644
 -  font-weight: 100 900;
 -  font-display: swap;
 -  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2");
--}
--
++  @media (prefers-color-scheme: dark) {
++    &:where([data-frontend-mode="system"], [data-frontend-mode="system"] *) {
++      @slot;
++    }
++  }
+ }
+
  @font-face {
-   font-family: "DM Sans Variable";
-   font-style: normal;
-@@ -46,147 +38,27 @@
+@@ -46,147 +48,27 @@
  }
 
  :root {
@@ -180,7 +189,7 @@ index 152ab23..bad062f 100644
  }
 
  * {
-@@ -242,20 +114,46 @@ a {
+@@ -242,20 +124,60 @@ a {
    top: 12px;
  }
 
@@ -211,19 +220,33 @@ index 152ab23..bad062f 100644
 +  gap: 12px;
 +}
 +
-+.project-actions .nav-link,
-+.project-actions .about-trigger {
-+  min-width: 44px;
-+  min-height: 44px;
++.desktop-project-actions {
++  display: contents;
++}
++
++.mobile-project-actions {
++  display: none;
 +}
 +
 +@media (width < 640px) {
++  .desktop-project-actions {
++    display: none;
++  }
++
++  .mobile-project-actions {
++    display: block;
++    padding-block: 12px;
++  }
++
 +  .project-actions {
 +    gap: 4px;
 +  }
 +
-+  .project-actions .nav-count,
-+  .project-actions .project-action-label {
++  .mobile-project-actions .project-actions {
++    justify-content: flex-end;
++  }
++
++  .project-actions .nav-count {
 +    display: none;
 +  }
 +
@@ -233,7 +256,20 @@ index 152ab23..bad062f 100644
  }
 
  .site-header {
-@@ -1354,7 +1252,7 @@ html:lang(zh-CN) .eyebrow, html:lang(zh-CN) .live-label, html:lang(zh-CN) .colle
+@@ -360,6 +282,12 @@ h1 > span {
+   color: var(--accent-text);
+ }
+
++.project-actions .nav-link,
++.project-actions .about-trigger {
++  min-width: 44px;
++  min-height: 44px;
++}
++
+ .nav-divider {
+   width: 1px;
+   height: 17px;
+@@ -1354,7 +1282,7 @@ html:lang(zh-CN) .eyebrow, html:lang(zh-CN) .live-label, html:lang(zh-CN) .colle
  }
 
  @media (width <= 1050px) {
@@ -242,7 +278,7 @@ index 152ab23..bad062f 100644
      width: calc(100% - 64px);
    }
 
-@@ -1398,7 +1296,7 @@ html:lang(zh-CN) .eyebrow, html:lang(zh-CN) .live-label, html:lang(zh-CN) .colle
+@@ -1398,7 +1326,7 @@ html:lang(zh-CN) .eyebrow, html:lang(zh-CN) .live-label, html:lang(zh-CN) .colle
  }
 
  @media (width <= 760px) {
@@ -309,31 +345,27 @@ index 2ebafb2..ba5caeb 100644
  }
 diff --git a/components/frontend-adapter.tsx b/components/frontend-adapter.tsx
 new file mode 100644
-index 0000000..c9ac236
+index 0000000..4c48d66
 --- /dev/null
 +++ b/components/frontend-adapter.tsx
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,33 @@
 +'use client'
 +
 +import type { FrontendPreferences, PreferencePolicy } from '@ztd-me/frontend'
 +import type { JSX, ReactNode } from 'react'
 +import { FrontendProvider } from '@ztd-me/frontend/client'
-+import { useEffect, useState } from 'react'
++import { useSyncExternalStore } from 'react'
 +import { ShowcaseI18nProvider } from '@/components/i18n-provider'
 +import { PreferencesProvider } from '@/components/preferences-provider'
 +
-+function useFullscreenContainer(): HTMLElement | null {
-+  const [container, setContainer] = useState<HTMLElement | null>(null)
-+  useEffect(() => {
-+    const update = () => {
-+      const fullscreen = document.fullscreenElement
-+      setContainer(fullscreen instanceof HTMLElement ? fullscreen : null)
-+    }
-+    update()
-+    document.addEventListener('fullscreenchange', update)
-+    return () => document.removeEventListener('fullscreenchange', update)
-+  }, [])
-+  return container
++function subscribeFullscreen(listener: () => void): () => void {
++  document.addEventListener('fullscreenchange', listener)
++  return () => document.removeEventListener('fullscreenchange', listener)
++}
++
++function fullscreenContainer(): HTMLElement | null {
++  const element = document.fullscreenElement
++  return element instanceof HTMLElement ? element : null
 +}
 +
 +export function FrontendAdapter({ initialPreferences, policy, children }: {
@@ -341,7 +373,7 @@ index 0000000..c9ac236
 +  policy: PreferencePolicy
 +  children: ReactNode
 +}): JSX.Element {
-+  const portalContainer = useFullscreenContainer()
++  const portalContainer = useSyncExternalStore(subscribeFullscreen, fullscreenContainer, () => null)
 +  return (
 +    <FrontendProvider initialPreferences={initialPreferences} policy={policy} portalContainer={portalContainer}>
 +      <ShowcaseI18nProvider initialLocale={initialPreferences.locale}>
@@ -351,14 +383,17 @@ index 0000000..c9ac236
 +  )
 +}
 diff --git a/components/i18n-provider.tsx b/components/i18n-provider.tsx
-index 43e26e4..8f22aa4 100644
+index 43e26e4..a8b60cf 100644
 --- a/components/i18n-provider.tsx
 +++ b/components/i18n-provider.tsx
-@@ -5,13 +5,17 @@ import type { JSX, ReactNode } from 'react'
+@@ -2,16 +2,20 @@
+
+ import type { JSX, ReactNode } from 'react'
+
++import type { Locale } from '@/lib/i18n'
  import { createInstance } from 'i18next'
  import { useState } from 'react'
  import { I18nextProvider } from 'react-i18next'
-+import type { Locale } from '@/lib/i18n'
  import { LOCALES, resources } from '@/lib/i18n'
 
 -export function ShowcaseI18nProvider({ children }: { children: ReactNode }): JSX.Element {
@@ -613,10 +648,10 @@ index 2f00cbf..f1cd4b8 100644
    )
  }
 diff --git a/components/site-shell.tsx b/components/site-shell.tsx
-index f52e324..956400c 100644
+index f52e324..39684a2 100644
 --- a/components/site-shell.tsx
 +++ b/components/site-shell.tsx
-@@ -1,36 +1,35 @@
+@@ -1,36 +1,36 @@
  'use client'
 
 +import type { LinkProps } from '@ztd-me/frontend'
@@ -626,8 +661,8 @@ index f52e324..956400c 100644
 +import Link from 'next/link'
  import { useTranslation } from 'react-i18next'
 -import { SiteHeader } from '@/components/site-header'
-+import { ProjectActions } from '@/components/site-header'
 +import { ShowcaseMark } from '@/components/showcase-mark'
++import { ProjectActions } from '@/components/site-header'
 
  export { IconButton } from '@/components/icon-button'
 
@@ -665,9 +700,10 @@ index f52e324..956400c 100644
 +      repositoryUrl="https://github.com/zeithrold/showcase"
 +      mainId="main-content"
 +      linkComponent={ProjectLink}
-+      projectActions={<ProjectActions directory={directory} />}
++      projectActions={<div className="desktop-project-actions"><ProjectActions directory={directory} /></div>}
 +    >
 +      <div className="site-content">
++        <div className="mobile-project-actions"><ProjectActions directory={directory} /></div>
 +        {persistence === 'unavailable' && <p role="status">{t('settings.persistenceUnavailable')}</p>}
 +        {children}
        </div>
@@ -676,17 +712,14 @@ index f52e324..956400c 100644
    )
  }
 diff --git a/css-check.config.mjs b/css-check.config.mjs
-index cfac5d8..9d186a8 100644
+index cfac5d8..f9915df 100644
 --- a/css-check.config.mjs
 +++ b/css-check.config.mjs
-@@ -1,4 +1,7 @@
+@@ -1,4 +1,4 @@
  export default {
    files: ['app/**/*.css'],
 -  tokenFiles: ['node_modules/tailwindcss/theme.css'],
-+  tokenFiles: [
-+    'node_modules/tailwindcss/theme.css',
-+    'node_modules/@ztd-me/frontend/dist/styles.css',
-+  ],
++  tokenFiles: ['node_modules/tailwindcss/theme.css', 'node_modules/@ztd-me/frontend/dist/styles.css'],
  }
 diff --git a/lib/clock.ts b/lib/clock.ts
 index f4fced5..401eab9 100644
@@ -703,19 +736,25 @@ index f4fced5..401eab9 100644
    hour: string
 diff --git a/lib/frontend-request.ts b/lib/frontend-request.ts
 new file mode 100644
-index 0000000..edbf91d
+index 0000000..89fb382
 --- /dev/null
 +++ b/lib/frontend-request.ts
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,36 @@
 +import type { FrontendPreferences, PreferencePolicy } from '@ztd-me/frontend'
 +import process from 'node:process'
 +import { createPreferencePolicy, resolveInitialPreferences } from '@ztd-me/frontend'
 +import { headers } from 'next/headers'
 +
-+function preferencePolicy(): PreferencePolicy {
++function deploymentEnvironment(): 'production' | 'preview' | 'development' {
 +  const configured = process.env.SHOWCASE_FRONTEND_ENVIRONMENT
-+  const development = process.env.NODE_ENV === 'development' || configured === 'development'
-+  const environment = development ? 'development' : configured === 'production' ? 'production' : 'preview'
++  if (process.env.NODE_ENV === 'development' || configured === 'development') {
++    return 'development'
++  }
++  return configured === 'production' ? 'production' : 'preview'
++}
++
++function preferencePolicy(): PreferencePolicy {
++  const environment = deploymentEnvironment()
 +  return createPreferencePolicy({
 +    environment,
 +    namespace: 'showcase',
@@ -781,19 +820,588 @@ index 4cc4c68..281562c 100644
  }
 
  export const PreferencesContext = createContext<PreferencesContextValue | null>(null)
-diff --git a/package.json b/package.json
-index acf5b32..9bb8bdb 100644
---- a/package.json
-+++ b/package.json
-@@ -7,7 +7,7 @@
-   "scripts": {
-     "dev": "vite dev",
-     "build": "vite build",
--    "start": "wrangler dev --config dist/server/wrangler.json",
-+    "start": "wrangler dev --config dist/server/wrangler.json --var SHOWCASE_FRONTEND_ENVIRONMENT:development",
-     "deploy": "pnpm build && wrangler deploy --config dist/server/wrangler.json",
-     "typecheck": "tsc --noEmit",
-     "test": "node --test tests/*.test.ts",
+diff --git a/tests/e2e/accessibility.spec.ts b/tests/e2e/accessibility.spec.ts
+index 99f699b..cdfab71 100644
+--- a/tests/e2e/accessibility.spec.ts
++++ b/tests/e2e/accessibility.spec.ts
+@@ -1,8 +1,9 @@
+ import { expect, test } from '@playwright/test'
+ import { assertAccessible, captureState } from '@ztd-me/frontend-checks/playwright'
+-import { openClock } from './helpers'
++import { openClock, selectAppearance } from './helpers'
+
+ const palettes = [
++  'Neutral',
+   'Terracotta',
+   'Moss',
+   'Ocean',
+@@ -20,12 +21,11 @@ for (const route of ['/', '/clock']) {
+         await page.goto('/')
+       }
+       if (theme === 'dark') {
+-        await page.getByRole('button', { name: 'Switch to dark theme' }).click()
++        await selectAppearance(page, 'Dark')
+       }
+       for (const palette of palettes) {
+-        const swatch = page.getByRole('button', { name: palette, exact: true })
+-        await swatch.click()
+-        await expect(swatch).toHaveAttribute('aria-pressed', 'true')
++        await selectAppearance(page, palette)
++        await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', palette.toLowerCase())
+         await assertAccessible(page, testInfo, { label: `${route}-${theme}-${palette}` })
+         await captureState(page, testInfo, `${theme}-${palette}`)
+       }
+diff --git a/tests/e2e/clock-layout.spec.ts b/tests/e2e/clock-layout.spec.ts
+index 1c5136f..f89e99b 100644
+--- a/tests/e2e/clock-layout.spec.ts
++++ b/tests/e2e/clock-layout.spec.ts
+@@ -1,5 +1,5 @@
+ import { expect, test } from '@playwright/test'
+-import { captureClockState, openClock } from './helpers'
++import { captureClockState, openClock, selectAppearance } from './helpers'
+
+ for (const width of [
+   1440,
+@@ -61,7 +61,7 @@ for (const width of [390, 320]) {
+     await openClock(page)
+     await page.getByRole('combobox', { name: 'Language', exact: true }).click()
+     await page.getByRole('option', { name: '简体中文' }).click()
+-    await page.getByRole('button', { name: '苔绿', exact: true }).click()
++    await selectAppearance(page, '苔绿')
+     const widths = await page.evaluate(() => {
+       const settings = document.querySelector('.clock-settings')
+       if (settings === null) {
+diff --git a/tests/e2e/clock-resilience.spec.ts b/tests/e2e/clock-resilience.spec.ts
+index 2358d5b..2ba5363 100644
+--- a/tests/e2e/clock-resilience.spec.ts
++++ b/tests/e2e/clock-resilience.spec.ts
+@@ -1,5 +1,5 @@
+ import { expect, test } from '@playwright/test'
+-import { openClock, watchErrors } from './helpers'
++import { openClock, selectAppearance, watchErrors } from './helpers'
+
+ test('clock preferences still work when browser storage is unavailable', async ({ page }) => {
+   const errors = watchErrors(page)
+@@ -10,10 +10,10 @@ test('clock preferences still work when browser storage is unavailable', async (
+   })
+   await page.goto('/clock')
+   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', /^\d{2}:\d{2}:\d{2}/)
+-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
+-  await page.getByRole('button', { name: 'Ocean', exact: true }).click()
++  await selectAppearance(page, 'Dark')
++  await selectAppearance(page, 'Ocean')
+   await expect(page.locator('html')).toHaveClass('dark')
+-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
+   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
+   await page.getByRole('option', { name: '简体中文' }).click()
+   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+diff --git a/tests/e2e/clock.spec.ts b/tests/e2e/clock.spec.ts
+index 68beac1..bc3b8fd 100644
+--- a/tests/e2e/clock.spec.ts
++++ b/tests/e2e/clock.spec.ts
+@@ -1,5 +1,5 @@
+ import { expect, test } from '@playwright/test'
+-import { captureClockState, openClock } from './helpers'
++import { captureClockState, openClock, selectAppearance } from './helpers'
+
+ test('hydrates cleanly and animates only changed digits through minute rollover', async ({ page }) => {
+   const errors: string[] = []
+@@ -33,16 +33,16 @@ test('timezone, format, seconds, and theme controls work and persist', async ({
+   await page.getByRole('switch', { name: 'Seconds' }).click()
+   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '11:59 PM, Shanghai')
+   await expect(page.locator('.sliding-digit')).toHaveCount(4)
+-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
++  await selectAppearance(page, 'Dark')
+   await expect(page.locator('html')).toHaveClass('dark')
+-  const saved = await page.evaluate((): unknown => JSON.parse(localStorage.getItem('showcase.clock.v1') ?? '{}'))
++  const saved = await page.evaluate((): unknown => {
++    return JSON.parse(localStorage.getItem('showcase.clock.settings.v1') ?? '{}')
++  })
+   expect(saved).toEqual({
++    version: 1,
+     timezone: 'Asia/Shanghai',
+     format: '12',
+     seconds: false,
+-    theme: 'dark',
+-    locale: 'en',
+-    palette: 'terracotta',
+   })
+   await page.reload()
+   await expect(page.locator('html')).toHaveClass('dark')
+@@ -66,6 +66,10 @@ test('fullscreen keeps timezone controls usable and exits correctly', async ({ p
+   await openClock(page)
+   await page.getByRole('button', { name: 'Enter fullscreen' }).click()
+   await expect(page.locator('#clock')).toHaveAttribute('data-focused', 'true')
++  await page.locator('#clock').getByRole('button', { name: 'Appearance', exact: true }).click()
++  await expect(page.locator('#clock').getByRole('menu')).toBeVisible()
++  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'dark')
+   await page.getByRole('combobox', { name: 'Timezone' }).click()
+   await page.getByRole('option', { name: 'Tokyo', exact: true }).click()
+   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '00:59:58, Tokyo')
+@@ -114,7 +118,7 @@ test('language switch translates dates, controls, accessible labels, and persist
+   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+   await openClock(page)
+   await expect(page).toHaveTitle('zeithrold/showcase')
+-  await expect(page.locator('.brand')).toHaveText('zeithrold/showcase')
++  await expect(page.locator('.ztd-brand')).toHaveText('zeithrold/showcase')
+   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
+   await page.getByRole('option', { name: '简体中文' }).click()
+   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+@@ -137,9 +141,10 @@ test('language switch translates dates, controls, accessible labels, and persist
+   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '03:59:58 PM, UTC')
+ })
+
+-test('all five palettes change the page and clock in both light and dark modes', async ({ page }) => {
++test('all six palettes change the page and clock in both light and dark modes', async ({ page }) => {
+   await openClock(page)
+   const palettes = [
++    'Neutral',
+     'Terracotta',
+     'Moss',
+     'Ocean',
+@@ -150,11 +155,11 @@ test('all five palettes change the page and clock in both light and dark modes',
+     const backgrounds = new Set<string>()
+     const secondsColors = new Set<string>()
+     if (mode === 'dark') {
+-      await page.getByRole('button', { name: 'Switch to dark theme' }).click()
++      await selectAppearance(page, 'Dark')
+     }
+     for (const name of palettes) {
+-      await page.getByRole('button', { name, exact: true }).click()
+-      await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute('aria-pressed', 'true')
++      await selectAppearance(page, name)
++      await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', name.toLowerCase())
+       const styles = await page.evaluate(() => {
+         const seconds = document.querySelector('.seconds-pair')
+         if (seconds === null) {
+@@ -168,12 +173,12 @@ test('all five palettes change the page and clock in both light and dark modes',
+       backgrounds.add(styles.background)
+       secondsColors.add(styles.seconds)
+     }
+-    expect(backgrounds.size).toBe(5)
+-    expect(secondsColors.size).toBe(5)
++    expect(backgrounds.size).toBe(6)
++    expect(secondsColors.size).toBe(6)
+   }
+-  await page.getByRole('button', { name: 'Ocean', exact: true }).click()
++  await selectAppearance(page, 'Ocean')
+   await page.reload()
+-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
+   await expect(page.locator('html')).toHaveClass('dark')
+   await captureClockState(page, test.info(), 'ocean-dark')
+ })
+diff --git a/tests/e2e/directory.spec.ts b/tests/e2e/directory.spec.ts
+index ed16035..47a2444 100644
+--- a/tests/e2e/directory.spec.ts
++++ b/tests/e2e/directory.spec.ts
+@@ -1,5 +1,6 @@
+ import { expect, test } from '@playwright/test'
+ import { captureState } from '@ztd-me/frontend-checks/playwright'
++import { selectAppearance } from './helpers'
+
+ test('homepage lists real pages and opens the clock as a separate route', async ({ page }) => {
+   const errors: string[] = []
+@@ -39,12 +40,12 @@ test('language, palette, theme and clock settings survive navigation and reload'
+   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
+   await page.getByRole('option', { name: '简体中文' }).click()
+   await expect(page.getByRole('heading', { name: '页面目录', exact: true })).toBeVisible()
+-  await page.getByRole('button', { name: '海蓝', exact: true }).click()
+-  await page.getByRole('button', { name: '切换到深色模式', exact: true }).click()
++  await selectAppearance(page, '海蓝')
++  await selectAppearance(page, '深色')
+   await page.getByRole('link', { name: '时钟', exact: true }).click()
+   await expect(page).toHaveURL(/\/clock$/)
+   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
+   await expect(page.locator('html')).toHaveClass('dark')
+   await page.getByRole('combobox', { name: '时区', exact: true }).click()
+   await page.getByRole('option', { name: '东京', exact: true }).click()
+@@ -54,7 +55,7 @@ test('language, palette, theme and clock settings survive navigation and reload'
+   await expect(page.getByRole('heading', { name: '页面目录', exact: true })).toBeVisible()
+   await page.reload()
+   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+-  await expect(page.getByRole('button', { name: '海蓝', exact: true })).toHaveAttribute('aria-pressed', 'true')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
+   await expect(page.locator('html')).toHaveClass('dark')
+   await page.getByRole('link', { name: '时钟', exact: true }).click()
+   await expect(page.getByRole('combobox', { name: '时区', exact: true })).toHaveText('东京')
+diff --git a/tests/e2e/helpers.ts b/tests/e2e/helpers.ts
+index c87cc37..4d53e1d 100644
+--- a/tests/e2e/helpers.ts
++++ b/tests/e2e/helpers.ts
+@@ -47,3 +47,14 @@ export async function captureClockState(page: Page, testInfo: TestInfo, label: s
+   })
+   await captureState(page, testInfo, label)
+ }
++
++export async function selectAppearance(
++  page: Page,
++  option: string,
++  within = page.getByRole('banner'),
++): Promise<void> {
++  const locale = await page.locator('html').getAttribute('lang')
++  await within.getByRole('button', { name: locale === 'zh-CN' ? '外观' : 'Appearance', exact: true }).click()
++  await page.getByRole('menuitemradio', { name: option, exact: true }).click()
++  await expect(page.getByRole('menu')).not.toBeVisible()
++}
+diff --git a/tests/e2e/keyboard.spec.ts b/tests/e2e/keyboard.spec.ts
+index d32089a..8cf3a4a 100644
+--- a/tests/e2e/keyboard.spec.ts
++++ b/tests/e2e/keyboard.spec.ts
+@@ -1,5 +1,5 @@
+ import { expect, test } from '@playwright/test'
+-import { openClock } from './helpers'
++import { openClock, selectAppearance } from './helpers'
+
+ test('Tab exposes skip navigation and Enter moves focus to main', async ({ page }) => {
+   await page.goto('/')
+@@ -58,9 +58,23 @@ test('keyboard operates clock preferences and the translated language menu', asy
+   await page.keyboard.press('Space')
+   await expect(page.getByRole('switch', { name: 'Seconds' })).not.toBeChecked()
+   await page.keyboard.press('Tab')
+-  await page.keyboard.press('Tab')
+-  await page.keyboard.press('Space')
+-  await expect(page.getByRole('button', { name: 'Moss', exact: true })).toHaveAttribute('aria-pressed', 'true')
++  await expect(page.locator('.clock-controls').getByRole('button', { name: 'Appearance', exact: true })).toBeFocused()
++  await page.keyboard.press('Enter')
++  await expect(page.getByRole('menuitemradio', { name: 'System', exact: true })).toBeFocused()
++  await page.keyboard.press('Home')
++  for (const name of [
++    'Light',
++    'Dark',
++    'Neutral',
++    'Terracotta',
++    'Moss',
++  ]) {
++    await page.keyboard.press('ArrowDown')
++    await expect(page.getByRole('menuitemradio', { name, exact: true })).toBeFocused()
++  }
++  await expect(page.getByRole('menuitemradio', { name: 'Moss', exact: true })).toBeFocused()
++  await page.keyboard.press('Enter')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'moss')
+   const language = page.getByRole('combobox', { name: 'Language', exact: true })
+   await language.focus()
+   await page.keyboard.press('Enter')
+@@ -87,6 +101,6 @@ test('an open select makes its hidden background inert and restores it on dismis
+   await page.keyboard.press('Escape')
+   await expect(timezone).toBeFocused()
+   await expect(page.locator('[inert]')).toHaveCount(0)
+-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
++  await selectAppearance(page, 'Dark')
+   await expect(page.locator('html')).toHaveClass('dark')
+ })
+diff --git a/tests/e2e/migration-boundaries.spec.ts b/tests/e2e/migration-boundaries.spec.ts
+index 2d5495d..4c06491 100644
+--- a/tests/e2e/migration-boundaries.spec.ts
++++ b/tests/e2e/migration-boundaries.spec.ts
+@@ -1,5 +1,5 @@
+ import { expect, test } from '@playwright/test'
+-import { captureClockState, openClock, watchErrors } from './helpers'
++import { captureClockState, openClock, selectAppearance, watchErrors } from './helpers'
+
+ test('header navigation stays within the current showcase routes', async ({ page }) => {
+   for (const route of ['/', '/clock']) {
+@@ -23,8 +23,8 @@ test('appearance changes preserve clock controls through navigation and reload',
+   await page.getByRole('option', { name: 'Tokyo', exact: true }).click()
+   await page.getByRole('button', { name: '12h', exact: true }).click()
+   await page.getByRole('switch', { name: 'Seconds' }).click()
+-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
+-  await page.getByRole('button', { name: 'Ocean', exact: true }).click()
++  await selectAppearance(page, 'Dark')
++  await selectAppearance(page, 'Ocean')
+   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
+   await page.getByRole('option', { name: '简体中文' }).click()
+   await page.getByRole('link', { name: '所有页面', exact: true }).click()
+@@ -36,7 +36,7 @@ test('appearance changes preserve clock controls through navigation and reload',
+   await expect(page.getByRole('button', { name: '12 小时', exact: true })).toHaveAttribute('aria-pressed', 'true')
+   await expect(page.getByRole('switch', { name: '显示秒数', exact: true })).not.toBeChecked()
+   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
+-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
+   await expect(page.locator('html')).toHaveClass('dark')
+   expect(errors).toEqual([])
+   await captureClockState(page, testInfo, 'clock-controls-after-appearance-change')
+diff --git a/tests/e2e/shared-fixtures.ts b/tests/e2e/shared-fixtures.ts
+new file mode 100644
+index 0000000..bcef79f
+--- /dev/null
++++ b/tests/e2e/shared-fixtures.ts
+@@ -0,0 +1,62 @@
++import type { BrowserContext, Page } from '@playwright/test'
++import type { FrontendPreferences } from '@ztd-me/frontend'
++
++export const COOKIE_NAME = 'ztd.frontend.development.showcase.v1'
++export const SHARED_PREFERENCES: FrontendPreferences = { version: 1, mode: 'dark', palette: 'ocean', locale: 'zh-CN' }
++
++export async function setSharedCookie(context: BrowserContext, preferences = SHARED_PREFERENCES): Promise<void> {
++  await context.addCookies([
++    {
++      name: COOKIE_NAME,
++      value: encodeURIComponent(JSON.stringify(preferences)),
++      domain: 'localhost',
++      path: '/',
++      sameSite: 'Lax',
++    },
++  ])
++}
++
++export async function changeLocale(page: Page, locale: 'en' | 'zh-CN'): Promise<void> {
++  const current = await page.locator('html').getAttribute('lang')
++  await page.getByRole('combobox', { name: current === 'zh-CN' ? '语言' : 'Language', exact: true }).click()
++  await page.getByRole('option', { name: locale === 'zh-CN' ? '简体中文' : 'English', exact: true }).click()
++}
++
++export async function denyStorage(page: Page, cookies = true): Promise<void> {
++  await page.addInitScript((denyCookies) => {
++    const storage = window.localStorage
++    storage.setItem('showcase.clock.v1', JSON.stringify({ timezone: 'Asia/Tokyo', token: 'synthetic-private' }))
++    const cookie = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
++    Reflect.set(window, 'denyShowcaseStorage', true)
++    const denied = () => Reflect.get(window, 'denyShowcaseStorage') === true
++    Object.defineProperty(window, 'localStorage', {
++      configurable: true,
++      get() {
++        if (denied()) {
++          throw new DOMException('Storage denied', 'SecurityError')
++        }
++        return storage
++      },
++    })
++    if (denyCookies) {
++      Object.defineProperty(document, 'cookie', {
++        configurable: true,
++        get() {
++          if (denied()) {
++            throw new DOMException('Cookie reads denied', 'SecurityError')
++          }
++          const value: unknown = cookie?.get?.call(document)
++          return typeof value === 'string' ? value : ''
++        },
++        set(value: unknown) {
++          if (denied()) {
++            throw new DOMException('Cookie writes denied', 'SecurityError')
++          }
++          if (typeof value === 'string') {
++            cookie?.set?.call(document, value)
++          }
++        },
++      })
++    }
++  }, cookies)
++}
+diff --git a/tests/e2e/shared-recovery.spec.ts b/tests/e2e/shared-recovery.spec.ts
+new file mode 100644
+index 0000000..cec876e
+--- /dev/null
++++ b/tests/e2e/shared-recovery.spec.ts
+@@ -0,0 +1,79 @@
++import { expect, test } from '@playwright/test'
++import { assertAccessible, captureState } from '@ztd-me/frontend-checks/playwright'
++import { selectAppearance, watchErrors } from './helpers'
++import { changeLocale, COOKIE_NAME, denyStorage, setSharedCookie } from './shared-fixtures'
++
++for (const width of [1440, 320]) {
++  test(`denied cookie and storage preserve SSR preferences and recover at ${width}px`, async ({ page, context }) => {
++    const errors = watchErrors(page)
++    await page.setViewportSize({ width, height: 900 })
++    await setSharedCookie(context)
++    await denyStorage(page)
++    await page.goto('/clock')
++    await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'dark')
++    await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
++    await expect(page.getByRole('heading', { level: 1 })).toContainText('让时间，轻轻流动')
++    const notice = page.locator('.site-content > [role="status"]')
++    await expect(notice).toContainText('无法保存')
++    await page.getByRole('combobox', { name: '时区', exact: true }).click()
++    await page.getByRole('option', { name: '东京', exact: true }).click()
++    await page.getByRole('button', { name: '12 小时', exact: true }).click()
++    await selectAppearance(page, '浅色')
++    await changeLocale(page, 'en')
++    await expect(page.getByRole('combobox', { name: 'Timezone', exact: true })).toHaveText('Tokyo')
++    await expect(page.getByRole('button', { name: '12h', exact: true })).toHaveAttribute('aria-pressed', 'true')
++    await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'light')
++    await page.evaluate(() => {
++      Reflect.set(window, 'denyShowcaseStorage', false)
++      window.dispatchEvent(new Event('focus'))
++    })
++    await expect(notice).toHaveCount(0)
++    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
++    await changeLocale(page, 'en')
++    const saved = (await context.cookies()).find(cookie => cookie.name === COOKIE_NAME)
++    expect(JSON.parse(decodeURIComponent(saved?.value ?? '{}'))).toEqual({
++      version: 1,
++      mode: 'dark',
++      palette: 'ocean',
++      locale: 'en',
++    })
++    const legacy = await page.evaluate((): unknown => JSON.parse(localStorage.getItem('showcase.clock.v1') ?? '{}'))
++    expect(legacy).toEqual({ timezone: 'Asia/Tokyo', token: 'synthetic-private' })
++    expect(errors).toEqual([])
++  })
++}
++
++test('denied localStorage preserves cookie persistence and clock controls', async ({ page, context }) => {
++  const errors = watchErrors(page)
++  await denyStorage(page, false)
++  await page.goto('/clock')
++  await selectAppearance(page, 'Dark')
++  await selectAppearance(page, 'Plum')
++  await changeLocale(page, 'zh-CN')
++  await page.getByRole('combobox', { name: '时区', exact: true }).click()
++  await page.getByRole('option', { name: '东京', exact: true }).click()
++  await expect(page.locator('.site-content > [role="status"]')).toHaveCount(0)
++  await page.reload()
++  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'dark')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'plum')
++  expect((await context.cookies()).some(cookie => cookie.name === COOKIE_NAME)).toBe(true)
++  expect(errors).toEqual([])
++})
++
++test('@a11y denied persistence feedback and shared menus remain accessible', async ({ page, context }, info) => {
++  await page.setViewportSize({ width: 320, height: 900 })
++  await setSharedCookie(context)
++  await denyStorage(page)
++  await page.goto('/clock')
++  await expect(page.locator('.site-content > [role="status"]')).toContainText('无法保存')
++  await assertAccessible(page, info, { label: 'denied-storage-page' })
++  await page.getByRole('banner').getByRole('button', { name: '外观', exact: true }).click()
++  await expect(page.getByRole('menu')).toBeVisible()
++  await assertAccessible(page, info, { label: 'denied-storage-appearance' })
++  await captureState(page, info, 'denied-storage-appearance')
++  await page.keyboard.press('Escape')
++  await page.getByRole('combobox', { name: '语言', exact: true }).click()
++  await expect(page.getByRole('listbox')).toBeVisible()
++  await assertAccessible(page, info, { label: 'denied-storage-locale' })
++})
+diff --git a/tests/e2e/shared-ssr.spec.ts b/tests/e2e/shared-ssr.spec.ts
+new file mode 100644
+index 0000000..b906c80
+--- /dev/null
++++ b/tests/e2e/shared-ssr.spec.ts
+@@ -0,0 +1,118 @@
++import { expect, test } from '@playwright/test'
++import { captureState } from '@ztd-me/frontend-checks/playwright'
++import { selectAppearance, watchErrors } from './helpers'
++import { COOKIE_NAME, setSharedCookie } from './shared-fixtures'
++
++test('cookie snapshots vary SSR content and remain uncached per request', async ({ request }) => {
++  for (const locale of ['en', 'zh-CN']) {
++    const value = encodeURIComponent(JSON.stringify({ version: 1, mode: 'dark', palette: 'ocean', locale }))
++    const response = await request.get('/clock', { headers: { cookie: `${COOKIE_NAME}=${value}` } })
++    expect(response.status()).toBe(200)
++    const body = await response.text()
++    expect(body).toContain(`lang="${locale}"`)
++    expect(body).toContain('data-frontend-mode="dark"')
++    expect(body).toContain('data-frontend-palette="ocean"')
++    expect(body).toContain(locale === 'en' ? 'Time, in motion' : '让时间，轻轻流动')
++    expect(response.headers()['cache-control']).toMatch(/private|no-store/u)
++  }
++})
++
++test('system dark and Chinese content render before JavaScript runs', async ({ browser }, info) => {
++  const context = await browser.newContext({ javaScriptEnabled: false, colorScheme: 'dark', locale: 'zh-CN' })
++  const page = await context.newPage()
++  await page.goto(info.project.use.baseURL ?? 'http://localhost:4173')
++  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'system')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'neutral')
++  await expect(page.getByRole('heading', { level: 1 })).toContainText('小小工具。')
++  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(23, 23, 23)')
++  await captureState(page, info, 'system-dark-before-javascript')
++  await context.close()
++})
++
++test('system changes update clock tokens while explicit mode and palette stay independent', async ({ page }) => {
++  const errors = watchErrors(page)
++  await page.emulateMedia({ colorScheme: 'dark' })
++  await page.goto('/clock')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'system')
++  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(23, 23, 23)')
++  await selectAppearance(page, 'Ocean')
++  await page.emulateMedia({ colorScheme: 'light' })
++  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(238, 243, 245)')
++  await selectAppearance(page, 'Dark')
++  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(25, 33, 38)')
++  await page.emulateMedia({ colorScheme: 'dark' })
++  await page.emulateMedia({ colorScheme: 'light' })
++  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(25, 33, 38)')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
++  expect(errors).toEqual([])
++})
++
++test('valid cookie wins over legacy appearance and preserves clock settings', async ({ page, context }) => {
++  const errors = watchErrors(page)
++  await setSharedCookie(context)
++  await page.addInitScript(() => {
++    localStorage.setItem('showcase.clock.v1', JSON.stringify({
++      timezone: 'Asia/Tokyo',
++      format: '12',
++      seconds: false,
++      theme: 'light',
++      palette: 'terracotta',
++      locale: 'en',
++    }))
++  })
++  await page.goto('/clock')
++  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
++  await expect(page.getByRole('combobox', { name: '时区', exact: true })).toHaveText('东京')
++  await expect(page.getByRole('button', { name: '12 小时', exact: true })).toHaveAttribute('aria-pressed', 'true')
++  await expect(page.getByRole('switch', { name: '显示秒数', exact: true })).not.toBeChecked()
++  expect(errors).toEqual([])
++})
++
++test('development ignores production cookies and forwarded host claims', async ({ page, context, request }) => {
++  const production = encodeURIComponent(JSON.stringify({ version: 1, mode: 'dark', palette: 'ocean', locale: 'zh-CN' }))
++  await context.addCookies([
++    { name: 'ztd.frontend.v1', value: production, domain: 'localhost', path: '/' },
++  ])
++  const response = await request.get('/', {
++    headers: { 'cookie': `ztd.frontend.v1=${production}`, 'x-forwarded-host': 'showcase.ztd.me' },
++  })
++  expect(await response.text()).toContain('data-frontend-palette="neutral"')
++  await page.goto('/')
++  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
++  await selectAppearance(page, 'Plum')
++  const cookies = await context.cookies()
++  expect(cookies.find(cookie => cookie.name === 'ztd.frontend.v1')?.value).toBe(production)
++  expect(cookies.some(cookie => cookie.name === COOKIE_NAME && !cookie.secure)).toBe(true)
++})
++
++test('future shared values remain untouched by clock updates', async ({ page, context }) => {
++  const future = encodeURIComponent(JSON.stringify({ version: 2, mode: 'dark', palette: 'ocean', locale: 'zh-CN' }))
++  await context.addCookies([
++    { name: COOKIE_NAME, value: future, domain: 'localhost', path: '/' },
++  ])
++  await page.goto('/clock')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'system')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'neutral')
++  await page.getByRole('combobox', { name: 'Timezone' }).click()
++  await page.getByRole('option', { name: 'Tokyo', exact: true }).click()
++  expect((await context.cookies()).find(cookie => cookie.name === COOKIE_NAME)?.value).toBe(future)
++})
++
++for (const width of [320, 390]) {
++  test(`shared header stays compact and project controls remain usable at ${width}px`, async ({ page }, info) => {
++    await page.setViewportSize({ width, height: 900 })
++    await page.goto('/clock')
++    const header = await page.getByRole('banner').boundingBox()
++    expect(header?.height).toBeLessThanOrEqual(65)
++    await expect(page.getByRole('link', { name: 'zeithrold/showcase home', exact: true })).toBeVisible()
++    await expect(page.getByRole('button', { name: 'About', exact: true })).toHaveText('About', { useInnerText: true })
++    await page.getByRole('button', { name: 'About', exact: true }).click()
++    await expect(page.getByRole('dialog')).toBeVisible()
++    await page.keyboard.press('Escape')
++    await page.getByRole('link', { name: /^Pages/u }).click()
++    await expect(page).toHaveURL(/\/#pages$/u)
++    await captureState(page, info, `compact-project-header-${width}`)
++  })
++}
 diff --git a/wrangler.jsonc b/wrangler.jsonc
 index b64affb..e9da1e0 100644
 --- a/wrangler.jsonc
@@ -806,3 +1414,15 @@ index b64affb..e9da1e0 100644
    "compatibility_date": "2026-10-01",
    "compatibility_flags": [
      "nodejs_compat"
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -7,7 +7,7 @@
+   "scripts": {
+     "dev": "vite dev",
+     "build": "vite build",
+-    "start": "wrangler dev --config dist/server/wrangler.json",
++    "start": "wrangler dev --config dist/server/wrangler.json --var SHOWCASE_FRONTEND_ENVIRONMENT:development",
+     "deploy": "pnpm build && wrangler deploy --config dist/server/wrangler.json",
+     "typecheck": "tsc --noEmit",
+     "test": "node --test tests/*.test.ts",
