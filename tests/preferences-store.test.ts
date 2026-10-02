@@ -1,6 +1,7 @@
 import type { PreferenceStorage } from '../lib/preferences-store.ts'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { readClockSettings } from '../lib/clock-settings.ts'
 import { DEFAULT_PREFERENCES } from '../lib/clock.ts'
 import { createPreferencesStore } from '../lib/preferences-store.ts'
 
@@ -88,4 +89,30 @@ test('unavailable storage does not prevent hydration or updates', () => {
   store.update({ timezone: 'Asia/Tokyo' })
   assert.equal(store.getSnapshot().preferences.timezone, 'Asia/Tokyo')
   unsubscribe()
+}).catch((error: unknown) => { throw error })
+
+test('appearance and language updates preserve local clock controls', () => {
+  const storage = memoryStorage(JSON.stringify({ timezone: 'Asia/Tokyo', format: '12', seconds: false }))
+  const store = createPreferencesStore(storage, ['en'])
+  const unsubscribe = store.subscribe(() => {})
+  const before: unknown = readClockSettings(store.getSnapshot().preferences)
+  store.update({ locale: 'zh-CN', theme: 'dark', palette: 'ocean' })
+  assert.deepEqual(readClockSettings(store.getSnapshot().preferences), before)
+  assert.deepEqual(readClockSettings(JSON.parse(storage.getItem('showcase.clock.v1') ?? '{}')), before)
+  unsubscribe()
+}).catch((error: unknown) => { throw error })
+
+test('independent app stores keep server snapshots and local clock state isolated', () => {
+  const first = createPreferencesStore(memoryStorage(JSON.stringify({ timezone: 'Asia/Tokyo' })), ['zh-CN'])
+  const second = createPreferencesStore(memoryStorage(JSON.stringify({ timezone: 'UTC' })), ['en'])
+  const server = second.getServerSnapshot()
+  const unsubscribeFirst = first.subscribe(() => {})
+  first.update({ format: '12', seconds: false })
+  assert.ok(Object.is(second.getSnapshot(), server))
+  const unsubscribeSecond = second.subscribe(() => {})
+  assert.equal(second.getSnapshot().preferences.timezone, 'UTC')
+  assert.equal(second.getSnapshot().preferences.format, '24')
+  assert.ok(Object.is(first.getServerSnapshot(), server))
+  unsubscribeFirst()
+  unsubscribeSecond()
 }).catch((error: unknown) => { throw error })
