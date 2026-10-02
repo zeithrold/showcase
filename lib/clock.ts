@@ -1,24 +1,14 @@
+import type { ClockFormat, ClockSettings, Timezone } from './clock-settings.ts'
 import type { Locale } from './i18n.ts'
 import type { Palette } from './palettes.ts'
+import { DEFAULT_CLOCK_SETTINGS, readClockSettings } from './clock-settings.ts'
 import { isLocale } from './i18n.ts'
 import { PALETTES } from './palettes.ts'
 
-export const TIMEZONES = [
-  { value: 'local', labelKey: 'timezone.local', cityKey: 'city.local' },
-  { value: 'Asia/Shanghai', labelKey: 'city.shanghai', cityKey: 'city.shanghai' },
-  { value: 'Asia/Tokyo', labelKey: 'city.tokyo', cityKey: 'city.tokyo' },
-  { value: 'Europe/London', labelKey: 'city.london', cityKey: 'city.london' },
-  { value: 'America/New_York', labelKey: 'city.newYork', cityKey: 'city.newYork' },
-  { value: 'Europe/Paris', labelKey: 'city.paris', cityKey: 'city.paris' },
-  { value: 'UTC', labelKey: 'timezone.utc', cityKey: 'city.utc' },
-] as const
+export type { ClockFormat, ClockSettings, Timezone } from './clock-settings.ts'
+export { DEFAULT_CLOCK_SETTINGS, isTimezone, readClockSettings, TIMEZONES } from './clock-settings.ts'
 
-export type Timezone = (typeof TIMEZONES)[number]['value']
-export type ClockFormat = '24' | '12'
-export interface ClockPreferences {
-  timezone: Timezone
-  format: ClockFormat
-  seconds: boolean
+export interface ClockPreferences extends ClockSettings {
   theme: 'light' | 'dark'
   locale: Locale
   palette: Palette
@@ -34,9 +24,7 @@ export interface ClockParts {
   offset: string
 }
 export const DEFAULT_PREFERENCES: ClockPreferences = {
-  timezone: 'local',
-  format: '24',
-  seconds: true,
+  ...DEFAULT_CLOCK_SETTINGS,
   theme: 'light',
   locale: 'en',
   palette: 'terracotta',
@@ -46,10 +34,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-export function isTimezone(value: unknown): value is Timezone {
-  return TIMEZONES.some(zone => zone.value === value)
-}
-
 function isPalette(value: unknown): value is Palette {
   return PALETTES.some(palette => palette.id === value)
 }
@@ -57,9 +41,7 @@ function isPalette(value: unknown): value is Palette {
 export function readPreferences(value: unknown, fallbackLocale: Locale = 'en'): ClockPreferences {
   const source = isRecord(value) ? value : {}
   return {
-    timezone: isTimezone(source.timezone) ? source.timezone : 'local',
-    format: source.format === '12' ? '12' : '24',
-    seconds: typeof source.seconds === 'boolean' ? source.seconds : true,
+    ...readClockSettings(source),
     theme: source.theme === 'dark' ? 'dark' : 'light',
     locale: isLocale(source.locale) ? source.locale : fallbackLocale,
     palette: isPalette(source.palette) ? source.palette : 'terracotta',
