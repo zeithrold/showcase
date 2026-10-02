@@ -3,9 +3,12 @@
 Source baseline: `a1ef35eb111bd53dedc083b965f30fb4e0ecfee1` (current main after PR #3).
 Preparation branch: `chore/shared-frontend-migration`.
 
-Implementation of the shared shell is gated on the parent supplying a verified stable public
-contract and an actual published `@ztd-me/frontend` version. This preparation does not add a
-package placeholder, guessed import, local shared-shell implementation or vendored artifact.
+The stable contract is verified at tools source
+`7f9401ae1aae60ceb130670a9ce427f4d643df96`: [consumer README](https://github.com/zeithrold/tools/blob/7f9401ae1aae60ceb130670a9ce427f4d643df96/packages/frontend/README.md),
+[draft PR #8](https://github.com/zeithrold/tools/pull/8) and
+[six passing CI jobs](https://github.com/zeithrold/tools/actions/runs/37033312032).
+The owner must still merge, stage and promote the package, followed by the registry smoke check.
+This preparation adds no dependency placeholder, local shared-shell implementation or vendored artifact.
 
 ## Approved target
 
@@ -40,6 +43,41 @@ appearance/locale. `readClockSettings` projects and validates only its three bus
 existing imports through `lib/clock.ts` remain compatible during preparation. The existing
 record and runtime appearance defaults remain unchanged until published-package integration.
 
+## Prepared integration
+
+`lib/clock-settings-store.ts` is ready to own only clock settings. It reads the legacy record
+when a current clock record is absent, preserves that legacy record for the shared provider's
+UI migration, and writes only `{ version: 1, timezone, format, seconds }` under
+`showcase.clock.settings.v1` after an explicit clock update. Corrupt/future records are not
+automatically overwritten. Storage failures preserve usable controls and mounted stores remain isolated.
+
+The unapplied `docs/shared-frontend-integration.patch` contains consumer adapters against the
+verified contract. It prepares these changes without making the active checkout depend on an
+unpublished package:
+
+- Resolve the request cookie and Accept-Language through the server-safe root exports.
+- Pass exactly that snapshot into the document attributes, metadata, translation instance and provider.
+- Use `PublicShell`, its fixed project footer, shared locale/appearance controls and routing adapter.
+- Keep Showcase's home/pages links, About content and brand mark in consumer-owned slots.
+- Bridge the resolved mode, shared locale and palette to the existing clock context and tokens.
+- Give the shared provider the active fullscreen portal container and show actual persistence failures.
+- Read an explicit application deployment mode rather than forwarded Host headers for cookie policy.
+
+The proposed non-sensitive `SHOWCASE_FRONTEND_ENVIRONMENT` application setting selects production
+only when explicitly configured, using the trusted `showcase.ztd.me` hostname. Unknown configurations
+fall back to preview policy; local development uses its isolated namespace. The patch sets the
+production Worker value and overrides local `pnpm start` to development. This uses the existing
+Node compatibility behavior documented in [Cloudflare environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/#environment-variables-and-nodejs-compatibility).
+No deployment route, credential, grant, CSP or CI deployment guard is changed.
+
+The patch's syntax and clean application are checked; its package-backed types/build/browser behavior
+remain unrun. After the parent's public-registry smoke succeeds, inspect the promoted package again,
+install its exact verified version with pnpm, apply the patch and complete the verification checklist.
+Existing browser selectors must move from palette buttons/theme toggles to the actual shared
+appearance menu and from old root attributes to `data-frontend-mode`/`data-frontend-palette`.
+Add consumer SSR/cache, system-mode, sharing/isolation, recovery and fullscreen-menu regressions.
+Then remove obsolete chrome CSS and any redundant dependencies using the actual published lockfile.
+
 ## Verification checklist
 
 - Install the parent's verified published version with pnpm and commit its real registry lockfile.
@@ -62,12 +100,12 @@ behavior and package integration tests depend on the published contract and are 
 ## Preparation validation
 
 On 2026-10-02, the frozen pnpm install and all seven native frontend gates passed: strict lint
-with zero warnings, CSS lint, type checks, 17 unit tests, the production Worker build, 35 browser
+with zero warnings, CSS lint, type checks, 22 unit tests, the production Worker build, 35 browser
 regressions and 6 accessibility scenarios covering 26 Axe scans. The new named clock capture
 confirms Chinese locale, Ocean/dark appearance and preserved Tokyo/12-hour/seconds-off controls.
 The intentional failure-evidence probe also passed, verifying Axe, screenshot, trace, video and
-report retention. Evidence is retained locally under `.zt/artifacts/check-2393406307` and
-`.zt/artifacts/failure-probe/check-4234551454`.
+report retention. Evidence is retained locally under `.zt/artifacts/check-3091914893` and
+`.zt/artifacts/failure-probe/check-3298227216`.
 
 This validates the preparation against current dependencies. Package integration and its new
 sharing/default-mode behavior still require the verified published contract, a fresh frozen
