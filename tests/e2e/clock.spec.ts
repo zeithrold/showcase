@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { openClock } from './helpers'
+import { captureClockState, openClock } from './helpers'
 
 test('hydrates cleanly and animates only changed digits through minute rollover', async ({ page }) => {
   const errors: string[] = []
@@ -47,7 +47,7 @@ test('timezone, format, seconds, and theme controls work and persist', async ({ 
   await page.reload()
   await expect(page.locator('html')).toHaveClass('dark')
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '11:59 PM, Shanghai')
-  await page.screenshot({ path: '/tmp/showcase-dark.png', fullPage: true, animations: 'disabled' })
+  await captureClockState(page, test.info(), 'dark')
 })
 
 test('copy returns displayed time, and About opens an accessible dialog', async ({ page, context }) => {
@@ -97,7 +97,7 @@ for (const viewport of [
       viewport: window.innerWidth,
     }))
     expect(widths.document).toBeLessThanOrEqual(widths.viewport)
-    await page.screenshot({ path: `/tmp/showcase-${viewport.width}.png`, fullPage: true, animations: 'disabled' })
+    await captureClockState(page, test.info(), `${viewport.width}`)
   })
 }
 
@@ -107,7 +107,7 @@ test('live clock advances using real browser timers', async ({ page }) => {
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', /^\d{2}:\d{2}:\d{2}/)
   const timestamp = await page.locator('time.clock-digits').getAttribute('datetime')
   await expect.poll(async () => await page.locator('time.clock-digits').getAttribute('datetime')).not.toBe(timestamp)
-  await page.screenshot({ path: '/tmp/showcase-live.png', fullPage: true, animations: 'disabled' })
+  await captureClockState(page, test.info(), 'live')
 })
 
 test('language switch translates dates, controls, accessible labels, and persists', async ({ page, context }) => {
@@ -175,5 +175,5 @@ test('all five palettes change the page and clock in both light and dark modes',
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
   await expect(page.locator('html')).toHaveClass('dark')
-  await page.screenshot({ path: '/tmp/showcase-ocean-dark.png', fullPage: true, animations: 'disabled' })
+  await captureClockState(page, test.info(), 'ocean-dark')
 })

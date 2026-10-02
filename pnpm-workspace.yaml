@@ -1,6 +1,6 @@
 minimumReleaseAgeExcludePrune: true
 minimumReleaseAgeExclude:
-  - '@ztd-me/eslint'
+  - '@ztd-me/*'
 
 trustPolicy: no-downgrade
 trustPolicyExclude:

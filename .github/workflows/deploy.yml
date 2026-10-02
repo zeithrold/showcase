@@ -37,18 +37,22 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm lint
-      - name: Typecheck
-        run: pnpm typecheck
-      - name: Unit tests
-        run: pnpm test
-      - name: Build Worker
-        run: pnpm build
+      - name: Setup pinned Go toolchain
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: 1.27.1
+          cache: false
+      - name: Install reviewed zt CLI
+        run: |
+          go install github.com/zeithrold/tools/cmd/zt@3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f
+          zt version
+          go version -m "$(command -v zt)"
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
-      - name: Verify production Worker locally
-        run: pnpm test:e2e
+      - name: Verify frontend and production Worker locally
+        run: pnpm check
+      - name: Verify failure evidence retention
+        run: pnpm test:evidence
       - name: Upload verified build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -57,16 +61,15 @@ jobs:
           include-hidden-files: true
           retention-days: 7
           if-no-files-found: error
-      - name: Upload browser evidence
+      - name: Upload frontend verification evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: browser-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            artifacts/
-            test-results/
+          name: frontend-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .zt/artifacts/
+          include-hidden-files: true
           retention-days: 7
-          if-no-files-found: ignore
+          if-no-files-found: error
 
   deploy:
     name: Deploy

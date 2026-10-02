@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { openClock } from './helpers'
+import { captureClockState, openClock } from './helpers'
 
 for (const width of [
   1440,
@@ -49,7 +49,7 @@ for (const width of [
         expect(bound.height).toBeLessThan(bound.clipHeight)
       }
       if (!fullscreen) {
-        await page.screenshot({ path: `/tmp/showcase-zero-${width}.png`, fullPage: true, animations: 'disabled' })
+        await captureClockState(page, test.info(), `zero-${width}`)
       }
     }
   })
@@ -76,7 +76,7 @@ for (const width of [390, 320]) {
     })
     expect(widths.document).toBeLessThanOrEqual(widths.viewport)
     expect(widths.settings).toBeLessThanOrEqual(widths.settingsClient)
-    await page.screenshot({ path: `/tmp/showcase-zh-moss-${width}.png`, fullPage: true, animations: 'disabled' })
+    await captureClockState(page, test.info(), `zh-moss-${width}`)
   })
 }
 

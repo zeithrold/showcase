@@ -50,6 +50,8 @@ function ClockDigits({ now, parts, preferences, label }: ClockDigitsProps): JSX.
   const digits = parts ?? EMPTY_DIGITS
   return (
     <time
+      role="timer"
+      aria-live="off"
       className={`clock-digits ${preferences.seconds ? '' : 'without-seconds'}`}
       dateTime={now?.toISOString()}
       aria-label={label}

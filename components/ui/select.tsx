@@ -3,6 +3,7 @@
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { Select as SelectPrimitive } from 'radix-ui'
 import * as React from 'react'
+import { inertSelectBackground } from '@/lib/inert-select-background'
 import { cn } from '@/lib/utils'
 
 const selectTriggerClasses = [
@@ -97,6 +98,7 @@ function SelectContent({
   return (
     <SelectPrimitive.Portal container={container}>
       <SelectPrimitive.Content
+        asChild
         data-slot="select-content"
         className={cn(
           selectContentClasses,
@@ -108,17 +110,19 @@ function SelectContent({
         align={align}
         {...props}
       >
-        <SelectScrollUpButton />
-        <SelectPrimitive.Viewport
-          className={cn(
-            'p-1',
-            position === 'popper'
-            && 'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1',
-          )}
-        >
-          {children}
-        </SelectPrimitive.Viewport>
-        <SelectScrollDownButton />
+        <div ref={inertSelectBackground}>
+          <SelectScrollUpButton />
+          <SelectPrimitive.Viewport
+            className={cn(
+              'p-1',
+              position === 'popper'
+              && 'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1',
+            )}
+          >
+            {children}
+          </SelectPrimitive.Viewport>
+          <SelectScrollDownButton />
+        </div>
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   )
