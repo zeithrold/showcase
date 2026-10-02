@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { captureState } from '@ztd-me/frontend-checks/playwright'
 
 test('homepage lists real pages and opens the clock as a separate route', async ({ page }) => {
   const errors: string[] = []
@@ -83,11 +84,7 @@ for (const width of [
       }))
       expect(widths.document).toBeLessThanOrEqual(widths.viewport)
       await expect(page.getByRole('link', { name: language === 'en' ? 'Clock' : '时钟', exact: true })).toBeVisible()
-      await page.screenshot({
-        path: `/tmp/showcase-directory-${language}-${width}.png`,
-        fullPage: true,
-        animations: 'disabled',
-      })
+      await captureState(page, test.info(), `directory-${language}-${width}`)
     })
   }
 }

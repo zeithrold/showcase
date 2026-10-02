@@ -12,6 +12,7 @@ Use **pnpm only**. Node.js 24 and pnpm 11.22.0 are used for this project.
 pnpm install --frozen-lockfile
 pnpm dev
 pnpm lint
+pnpm lint:css
 pnpm typecheck
 pnpm test
 pnpm build
@@ -20,7 +21,21 @@ pnpm test:e2e
 pnpm deploy
 ```
 
-`pnpm check` runs lint, type checking, unit tests, the build, and the browser suite in order (install Chromium first). The workspace enables pnpm's portable shell, release-age exclusion pruning, and `trustPolicy: no-downgrade`; only `@ztd-me/eslint` is exempted from the release-age gate. The approved trust exception covers only `semver@6.3.1`, which Babel 7 requires and which lacks provenance. Build-script permission remains limited to `esbuild` and `workerd` through pnpm 11's `allowBuilds` configuration.
+Install the reviewed `zt` CLI with Go 1.27.1 (or a compatible Go toolchain):
+
+```sh
+go install github.com/zeithrold/tools/cmd/zt@3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f
+zt sync --root . --plan
+zt sync --root .
+pnpm check
+```
+
+`zt.json` maps the frontend profile to native lint, CSS, typecheck, unit, build, browser regression and accessibility commands. `pnpm check` runs that profile once without recursion or repeated browser cases. Chromium must be installed first. Regression tests and Axe scans use separate artifact subdirectories; `pnpm test:e2e` runs both suites together when requested. `zt` retains command logs and its structured report under `.zt/artifacts/<run>/`, together with CSS results, full Axe JSON, HTML/JSON browser reports, named state captures and failure traces/screenshots/videos. `pnpm test:evidence` deliberately
+fails an isolated unnamed-button fixture and verifies retained evidence and stopped later gates. CI uploads this directory even when verification fails.
+
+The five managed Skills directories and `zt.lock.json` come from the same reviewed tools commit. Preview sync before applying it; the CLI refuses to overwrite unmanaged files or local edits. See [DESIGN.md](DESIGN.md) for this application's design and verification contract.
+
+The published `@ztd-me/frontend-checks@0.1.0` helper and compatible `@playwright/test@1.62.0` are pinned. CSS checks enforce native syntax, semantic paint tokens, and defined custom property references. Browser checks scan both routes in every light/dark palette, translated mobile dialogs and menus, and exercise keyboard navigation and focus restoration. Captured screenshots are evidence; visual baselines and performance budgets remain deferred. The workspace enables pnpm's portable shell, release-age exclusion pruning, and `trustPolicy: no-downgrade`; the approved `@ztd-me/*` scope is exempted from the release-age gate only. The approved trust exception covers only `semver@6.3.1`, which Babel 7 requires and which lacks provenance. Build-script permission remains limited to `esbuild` and `workerd` through pnpm 11's `allowBuilds` configuration.
 
 `pnpm start` serves the production Worker locally. `pnpm deploy` builds and deploys the Worker and its `showcase.ztd.me` Custom Domain, using your Wrangler authentication. `wrangler.jsonc` is the source deployment configuration; `dist/server/wrangler.json` is generated during build.
 

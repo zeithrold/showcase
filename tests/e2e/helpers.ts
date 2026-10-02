@@ -1,5 +1,6 @@
-import type { Page } from '@playwright/test'
+import type { Page, TestInfo } from '@playwright/test'
 import { expect } from '@playwright/test'
+import { captureState } from '@ztd-me/frontend-checks/playwright'
 
 const instant = new Date('2026-10-01T15:59:58.500Z')
 
@@ -35,4 +36,14 @@ export function watchErrors(page: Page): string[] {
     }
   })
   return errors
+}
+
+export async function captureClockState(page: Page, testInfo: TestInfo, label: string): Promise<void> {
+  // Keep the display fixed while allowing browser animation frames to paint.
+  await page.clock.setFixedTime(await page.evaluate(() => Date.now()))
+  await page.clock.resume()
+  await page.locator('time.clock-digits').evaluate(async (element) => {
+    await Promise.all(element.getAnimations({ subtree: true }).map(async animation => await animation.finished))
+  })
+  await captureState(page, testInfo, label)
 }
