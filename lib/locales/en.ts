@@ -90,5 +90,6 @@ export const en = {
     'Find your timezone. Go fullscreen. Make it yours. Your preferences stay with you, for '
     + 'the next time you drop by.',
   'footer.credit': 'Thoughtfully put together by',
+  'footer.source': 'GitHub repository',
   'footer.progress': 'Always a work in progress.',
 } as const

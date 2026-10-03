@@ -82,5 +82,6 @@ export const zhCN = {
   'notes.everydayTitle': '留一小片空间，慢下来。',
   'notes.everydayBody': '选一个时区，进入全屏，调一组喜欢的颜色。偏好会留在浏览器里，等你下次再来。',
   'footer.credit': '用心设计与开发',
+  'footer.source': 'GitHub 仓库',
   'footer.progress': '持续打磨，慢慢生长。',
 } satisfies Record<keyof typeof en, string>

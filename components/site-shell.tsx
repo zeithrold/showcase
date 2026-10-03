@@ -21,7 +21,13 @@ export function SiteShell({ children, directory = false }: { children: ReactNode
   return (
     <PublicShell
       brand={{ label: 'zeithrold/showcase', homeHref: '/', mark: <ShowcaseMark /> }}
-      repositoryUrl="https://github.com/zeithrold/showcase"
+      footer={{
+        copyright: '© Zeithrold',
+        links: [
+          { label: 'GitHub', href: 'https://github.com/zeithrold/showcase', ariaLabel: t('footer.source') },
+          { label: 'hello@ztd.me', href: 'mailto:hello@ztd.me' },
+        ],
+      }}
       mainId="main-content"
       linkComponent={ProjectLink}
       projectActions={<div className="desktop-project-actions"><ProjectActions directory={directory} /></div>}
