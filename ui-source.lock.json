@@ -64,6 +64,10 @@
     "components/ui/ztd-me/README.md": {
       "sha256": "e3afd6df1ab702d68795c12352acd08cf01c027cd537c7d390a457bc409f15bd",
       "reason": "Correct the plain JSX example fence from tsx to jsx and sort its imports for strict project-aware Markdown lint; runtime source is unchanged."
+    },
+    "components/ui/ztd-me/styles/fonts.css": {
+      "sha256": "523c594708d8cf19c4e13c4cfc57b724f559202194404e8b37e9421900b5dc6c",
+      "reason": "Use the Google Fonts variable range 400..700 for every Sans family to eliminate repeated CSS declarations while retaining the same font URL set, all required weights and glyph coverage; the exact upstream query exceeded the unchanged Chinese cold transfer cap in CI."
     }
   }
 }

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import source from '../ui-source.lock.json' with { type: 'json' }
 
-test('reviewed UI source, documentation adaptation and licenses match the pinned public inventory', async () => {
+test('reviewed UI source, local adaptations and licenses match the pinned public inventory', async () => {
   assert.equal(source.sourceSha, '7c708c0e0672a302cd751550276fb7a7a43cf1e5')
   assert.equal(source.publicInstallationVerified, true)
   assert.equal(Object.keys(source.files).length, 42)

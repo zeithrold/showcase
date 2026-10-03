@@ -46,7 +46,10 @@ export async function assertWeight(page: Page, info: TestInfo): Promise<void> {
       canvas.font = `${value} 24px "Noto Sans"`
       return canvas.measureText('English Noto weight').width
     })
-    const faces = Array.from(document.fonts).filter(face => face.weight === '600' && face.status === 'loaded')
+    const faces = Array.from(document.fonts).filter((face) => {
+      const [minimum = '', maximum = minimum] = face.weight.split(' ')
+      return face.status === 'loaded' && Number(minimum) <= 600 && Number(maximum) >= 600
+    })
     return {
       weight: getComputedStyle(node).fontWeight,
       synthesis: getComputedStyle(node).fontSynthesis,
@@ -57,5 +60,12 @@ export async function assertWeight(page: Page, info: TestInfo): Promise<void> {
   expect(weight).toMatchObject({ weight: '600', synthesis: 'none' })
   expect(weight.faces.some(face => face.family.includes('Noto Sans SC'))).toBe(true)
   expect(weight.widths[1]).not.toBe(weight.widths[0])
+  const session = await page.context().newCDPSession(page)
+  await session.send('DOM.enable')
+  await session.send('CSS.enable')
+  const fonts = await renderedFonts(session, '#font-bold')
+  await info.attach('noto-weight-platform-fonts', { body: JSON.stringify(fonts), contentType: 'application/json' })
+  expect(fonts.every(font => font.isCustomFont && font.familyName.startsWith('Noto Sans'))).toBe(true)
+  expect(fonts.some(font => font.familyName.startsWith('Noto Sans SC') && font.glyphCount > 0)).toBe(true)
   await info.attach('noto-weight-evidence', { body: JSON.stringify(weight), contentType: 'application/json' })
 }

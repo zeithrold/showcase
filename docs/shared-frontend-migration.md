@@ -7,8 +7,9 @@ public payload digest, 42 installed file digests, required dependency pins and r
 No `@ztd-me/frontend` runtime package, Fontsource dependency or font binary remains.
 
 The fresh public installation matched all 42 approved payload files before adaptation, without
-replacing existing consumer files. The only adaptation changes the README's plain JSX example
-fence from TSX to JSX and orders its imports for project-aware Markdown lint. All runtime source,
+replacing existing consumer files. Local adaptations change the README's plain JSX example fence
+from TSX to JSX, order its imports for project-aware Markdown lint, and use the Google API's variable
+weight range to avoid repeating identical font declarations. All TypeScript runtime source, other
 styles, licenses and the delivered declaration patch retain their upstream bytes. Keep the MIT,
 shadcn MIT and six Noto OFL notices delivered under `components/ui/ztd-me/`.
 
@@ -38,7 +39,16 @@ Ordinary UI and clock typography use Noto Sans through the direct Google Fonts C
 Sans SC/JP/KR for English and CJK coverage, weights 400/500/600/700 and no synthesized weights.
 Noto Color Emoji handles intentional emoji, including composed sequences. Serif families are not
 loaded because this consumer has no serif content role. `styles/fonts.css` owns the request and tokens;
-read the delivered `fonts.md` for exact query, licensing and remote-font mutability.
+read the delivered `fonts.md` for the upstream query, licensing and remote-font mutability.
+
+The installed font request locally uses `wght@400..700` for each Sans family, retaining every required
+weight. The initial exact upstream request repeated the same variable font URLs in four weight blocks;
+actual CI measured 1,084,594 bytes on the Chinese clock, exceeding its 1,000,000-byte cap. Google's
+[variable-axis API](https://developers.google.com/fonts/docs/css2#axis_ranges) returns the same 368
+unique font URLs with one block per subset instead of four. A normal-TLS Chrome-user-agent probe
+reduced decoded API CSS from 1,304,025 to 333,750 bytes without changing any font URL, family, glyph
+coverage, application font weight or security origin. This reviewed adaptation is recorded separately
+from upstream hashes. Remote CI still enforces the original combined response caps.
 
 The browser contacts fonts.googleapis.com for CSS and fonts.gstatic.com for subsets. These services
 receive normal request information such as IP address and headers; the source SHA does not make
