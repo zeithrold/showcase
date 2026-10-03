@@ -1,18 +1,19 @@
 # Generic shared frontend correction preparation
 
-**PR #5 is blocked pending the generic package API, corrected publication and registry verification.**
+**PR #5 is blocked pending frontend 0.2.0 publication and registry verification.**
 The owner requires no legacy storage-key mappings in the package or consumers. Current dependency
 `@ztd-me/frontend@0.1.0` cannot satisfy that requirement: its provider reads a project-specific legacy
 key during connection and exposes no opt-out. Its policy also uses the fixed `Project` union,
 `namespace` selection and a hard-coded ztd.me domain, while its footer assumes fixed destinations.
-These dependencies must be replaced through the precise generic API after the tools task defines it.
+The replacement API has now passed exact-source consumer validation as described below. Its
+adapter is retained as an unapplied patch until the owner completes the public-registry gate.
 No unpublished replacement or temporary tarball dependency is committed.
 
 Baseline: Showcase main `d6d78dfb896eb4ee18bbf188d211b6a6a0669ccc` (PR #4).
 This application uses the promoted public registry releases `@ztd-me/frontend@0.1.0`
 and `@ztd-me/frontend-checks@0.1.1` with a real frozen pnpm lockfile. The owner verified
 both registry archives against tools `de4ec8fdab86c40789fdf02b82601350a12e111d` CI artifacts before integration.
-The retained candidate patch and receipt have been replaced by active application code and tests.
+The original 0.1.0 candidate patch and receipt were replaced by active application code and tests.
 
 ## Ownership and behavior
 
@@ -116,9 +117,9 @@ It establishes the previous contract's behavior, not compliance with the subsequ
 correction. The preparation removes consumer fallback reads, changes positive browser fixtures to
 current UI cookies/clock records, and retains negative tests proving unrelated old/private records
 are neither read by the clock store nor rewritten. Complete UI-level legacy-ignore coverage and
-generic policy/footer integration await the new API. Existing new-format preferences remain usable.
+generic policy/footer integration were pending at that earlier step. Existing new-format preferences remain usable.
 
-## Generic correction preparation validation
+## Generic correction preparation validation against published 0.1.0
 
 The consumer clock fallback removal and current-format fixture changes pass all seven native gates
 against the still-published frontend 0.1.0: zero-warning ESLint, CSS, types, 17 unit tests, production
@@ -129,4 +130,47 @@ and zero violations. The failure-evidence probe passes. Reports are retained in
 No application source maps or reads an old preference key. Such key references remain only in
 negative unit fixtures proving non-use/non-mutation. The upstream 0.1.0 provider's legacy path
 still blocks the complete requirement; generic-source validation and corrected registry adoption
-have not run because the precise API/release is pending. No old/private record has been deleted.
+were pending at this preparation step. No old/private record has been deleted.
+
+## Exact-source frontend 0.2.0 validation
+
+Tools [PR #9](https://github.com/zeithrold/tools/pull/9), source
+`757ecc6ae77a361680efb9e5875815ff28a65146`, defines the generic contract in
+[upgrade-0.2.md](https://github.com/zeithrold/tools/blob/757ecc6ae77a361680efb9e5875815ff28a65146/packages/frontend/docs/upgrade-0.2.md).
+The source archive's package was installed frozen and packed without source changes.
+Its SHA-256 matches the parent's reviewed CI archive exactly:
+`0dbe39fb76dbfd7d45a3d581fb4b66f9e5546ff4736c9e85028874377fda6c5c`.
+The resulting tarball was installed only in a disposable checkout at consumer baseline
+`e9c892761008600fa3caf9e70b2ab69056ff06cc`; its subsequent frozen install also passed.
+Age, trust and build protections remain intact, and the consumer uses unpatched Radix runtime/types.
+
+`docs/shared-frontend-generic-integration.patch` contains the tested source adapters and regressions,
+with no manifest placeholder, temporary dependency, vendored implementation or generated lockfile:
+
+- `showcasePreferencePolicy` explicitly supplies existing cookie names, production domain, Secure
+  policy and notification mirror names; none of these choices is inferred by the shared package.
+- The shell supplies © Zeithrold, this repository, hello@ztd.me and localized GitHub accessible names
+  through the generic footer configuration. Existing branding, slots and navigation remain local.
+- Storage audit fixtures record all attempts, including errors caught by application code. They
+  reject reads of old/private/notification keys and permit only current clock reads and explicit
+  current clock/mirror writes. Mounting performs no persistence writes; old records remain intact.
+- Existing version-1 UI cookies and current clock records survive initialization, updates and reload
+  without conversion. Missing new-format preferences use approved defaults and ignore old values.
+
+All seven native gates pass: zero-warning ESLint, CSS, TypeScript, 20 unit tests, production Worker
+build, 51 main Chromium regressions plus two production/preview boundary regressions, and seven
+accessibility scenarios with 33 complete Axe scans and zero violations. No browser test was skipped,
+unexpected or flaky. SSR/cache, system mode before JavaScript, both locales, palette/clock behavior,
+denied-storage recovery, fullscreen/keyboard paths and explicit sharing/isolation remain covered.
+The failure-evidence probe also passes. Retained mobile and Chinese Ocean/dark clock captures were
+visually reviewed; no additional UI behavior change is introduced by the generic adapter.
+
+See `docs/shared-frontend-generic-verification.json` for exact archive/patch hashes and outcomes.
+Reports, captures, full scans, traces/videos, source install/pack and consumer logs are retained under
+`.zt/artifacts/frontend-generic-757ecc6`. These are disposable candidate results; branch CI continues
+to test the currently published 0.1.0 application until final adoption.
+
+No consumer compatibility blocker remains. After owner merge/promotion and successful public-registry
+smoke for exact frontend 0.2.0, install that registry version with pnpm while retaining unrelated
+resolutions, apply the patch, commit the real registry lockfile and repeat all gates and exact-head CI.
+The same draft PR stays blocked on that publication boundary; no merge or manual deployment occurred.

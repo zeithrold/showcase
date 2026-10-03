@@ -1,0 +1,298 @@
+diff --git a/components/site-shell.tsx b/components/site-shell.tsx
+index 39684a2..950b8a7 100644
+--- a/components/site-shell.tsx
++++ b/components/site-shell.tsx
+@@ -21,7 +21,13 @@ export function SiteShell({ children, directory = false }: { children: ReactNode
+   return (
+     <PublicShell
+       brand={{ label: 'zeithrold/showcase', homeHref: '/', mark: <ShowcaseMark /> }}
+-      repositoryUrl="https://github.com/zeithrold/showcase"
++      footer={{
++        copyright: '© Zeithrold',
++        links: [
++          { label: 'GitHub', href: 'https://github.com/zeithrold/showcase', ariaLabel: t('footer.source') },
++          { label: 'hello@ztd.me', href: 'mailto:hello@ztd.me' },
++        ],
++      }}
+       mainId="main-content"
+       linkComponent={ProjectLink}
+       projectActions={<div className="desktop-project-actions"><ProjectActions directory={directory} /></div>}
+diff --git a/lib/frontend-policy.ts b/lib/frontend-policy.ts
+new file mode 100644
+index 0000000..1d11d3e
+--- /dev/null
++++ b/lib/frontend-policy.ts
+@@ -0,0 +1,18 @@
++import type { PreferencePolicy } from '@ztd-me/frontend'
++import { createPreferencePolicy } from '@ztd-me/frontend'
++
++const COOKIE_NAMES = {
++  production: 'ztd.frontend.v1',
++  preview: 'ztd.frontend.preview.showcase.v1',
++  development: 'ztd.frontend.development.showcase.v1',
++} as const
++
++export function showcasePreferencePolicy(environment: keyof typeof COOKIE_NAMES): PreferencePolicy {
++  const name = COOKIE_NAMES[environment]
++  return createPreferencePolicy({
++    name,
++    secure: environment !== 'development',
++    mirrorKey: name,
++    ...(environment === 'production' ? { domain: 'ztd.me' } : {}),
++  })
++}
+diff --git a/lib/frontend-request.ts b/lib/frontend-request.ts
+index 5a9b1cd..76ec3f0 100644
+--- a/lib/frontend-request.ts
++++ b/lib/frontend-request.ts
+@@ -1,8 +1,9 @@
+ import type { FrontendPreferences, PreferencePolicy } from '@ztd-me/frontend'
+ import process from 'node:process'
+-import { createPreferencePolicy, resolveInitialPreferences } from '@ztd-me/frontend'
++import { resolveInitialPreferences } from '@ztd-me/frontend'
+ import { headers } from 'next/headers'
+ import { showcaseAcceptLanguage } from './frontend-locale'
++import { showcasePreferencePolicy } from './frontend-policy'
+
+ function deploymentEnvironment(): 'production' | 'preview' | 'development' {
+   const configured = process.env.SHOWCASE_FRONTEND_ENVIRONMENT
+@@ -12,22 +13,12 @@ function deploymentEnvironment(): 'production' | 'preview' | 'development' {
+   return configured === 'production' ? 'production' : 'preview'
+ }
+
+-function preferencePolicy(): PreferencePolicy {
+-  const environment = deploymentEnvironment()
+-  return createPreferencePolicy({
+-    environment,
+-    namespace: 'showcase',
+-    hostname: environment === 'production' ? 'showcase.ztd.me' : 'localhost',
+-    protocol: environment === 'development' ? 'http:' : 'https:',
+-  })
+-}
+-
+ export async function frontendRequestState(): Promise<{
+   policy: PreferencePolicy
+   initialPreferences: FrontendPreferences
+ }> {
+   const request = await headers()
+-  const policy = preferencePolicy()
++  const policy = showcasePreferencePolicy(deploymentEnvironment())
+   const initialPreferences = resolveInitialPreferences({
+     policy,
+     cookieHeader: request.get('cookie') ?? undefined,
+diff --git a/lib/locales/en.ts b/lib/locales/en.ts
+index bb6359a..a9aa69c 100644
+--- a/lib/locales/en.ts
++++ b/lib/locales/en.ts
+@@ -90,5 +90,6 @@ export const en = {
+     'Find your timezone. Go fullscreen. Make it yours. Your preferences stay with you, for '
+     + 'the next time you drop by.',
+   'footer.credit': 'Thoughtfully put together by',
++  'footer.source': 'GitHub repository',
+   'footer.progress': 'Always a work in progress.',
+ } as const
+diff --git a/lib/locales/zh-CN.ts b/lib/locales/zh-CN.ts
+index 2ff7532..0978521 100644
+--- a/lib/locales/zh-CN.ts
++++ b/lib/locales/zh-CN.ts
+@@ -82,5 +82,6 @@ export const zhCN = {
+   'notes.everydayTitle': '留一小片空间，慢下来。',
+   'notes.everydayBody': '选一个时区，进入全屏，调一组喜欢的颜色。偏好会留在浏览器里，等你下次再来。',
+   'footer.credit': '用心设计与开发',
++  'footer.source': 'GitHub 仓库',
+   'footer.progress': '持续打磨，慢慢生长。',
+ } satisfies Record<keyof typeof en, string>
+diff --git a/tests/e2e/storage-audit.ts b/tests/e2e/storage-audit.ts
+new file mode 100644
+index 0000000..34d2a11
+--- /dev/null
++++ b/tests/e2e/storage-audit.ts
+@@ -0,0 +1,75 @@
++import type { Page } from '@playwright/test'
++
++declare global {
++  interface Window {
++    showcaseStorageAudit: {
++      reads: string[]
++      writes: string[]
++      records: () => Record<string, string | null>
++    }
++  }
++}
++
++export async function auditPreferenceStorage(page: Page, currentClock: boolean): Promise<void> {
++  await page.addInitScript((withCurrent) => {
++    const storage = window.localStorage
++    const clockKey = 'showcase.clock.settings.v1'
++    const mirrorKey = 'ztd.frontend.development.showcase.v1'
++    const old = JSON.stringify({ timezone: 'Asia/Tokyo', theme: 'dark', palette: 'plum', locale: 'zh-CN' })
++    const records = {
++      'showcase.clock.v1': old,
++      'ztd.home.v1': old,
++      'locale': 'zh-CN',
++      'synthetic.business.record': JSON.stringify({ token: 'synthetic-private' }),
++    }
++    for (const [key, value] of Object.entries(records)) {
++      storage.setItem(key, value)
++    }
++    if (withCurrent) {
++      storage.setItem(clockKey, JSON.stringify({ version: 1, timezone: 'UTC', format: '12', seconds: false }))
++    }
++    const reads: string[] = []
++    const writes: string[] = []
++    window.showcaseStorageAudit = {
++      reads,
++      writes,
++      records: () => Object.fromEntries(Object.keys(records).map(key => [
++        key,
++        storage.getItem(key),
++      ])),
++    }
++    Object.defineProperty(window, 'localStorage', {
++      configurable: true,
++      value: {
++        getItem(key: string) {
++          reads.push(key)
++          if (key !== clockKey) {
++            throw new Error(`Unexpected storage read: ${key}`)
++          }
++          return storage.getItem(key)
++        },
++        setItem(key: string, value: string) {
++          writes.push(key)
++          if (key !== clockKey && key !== mirrorKey) {
++            throw new Error(`Unexpected storage write: ${key}`)
++          }
++          storage.setItem(key, value)
++        },
++        removeItem(key: string) { writes.push(`remove:${key}`) },
++        clear() { writes.push('clear') },
++      },
++    })
++  }, currentClock)
++}
++
++export async function preferenceStorageAudit(page: Page): Promise<{
++  reads: string[]
++  writes: string[]
++  records: Record<string, string | null>
++}> {
++  return await page.evaluate(() => ({
++    reads: window.showcaseStorageAudit.reads,
++    writes: window.showcaseStorageAudit.writes,
++    records: window.showcaseStorageAudit.records(),
++  }))
++}
+diff --git a/tests/e2e/storage-boundaries.spec.ts b/tests/e2e/storage-boundaries.spec.ts
+new file mode 100644
+index 0000000..805a6cd
+--- /dev/null
++++ b/tests/e2e/storage-boundaries.spec.ts
+@@ -0,0 +1,67 @@
++import { expect, test } from '@playwright/test'
++import { captureState } from '@ztd-me/frontend-checks/playwright'
++import { selectAppearance, watchErrors } from './helpers'
++import { changeLocale, COOKIE_NAME, setSharedCookie } from './shared-fixtures'
++import { auditPreferenceStorage, preferenceStorageAudit } from './storage-audit'
++
++test('missing preferences ignore old/private records without storage changes', async ({ page, context }, info) => {
++  const errors = watchErrors(page)
++  await context.addCookies([
++    { name: 'locale', value: 'zh-CN', domain: 'localhost', path: '/' },
++  ])
++  await auditPreferenceStorage(page, false)
++  await page.goto('/clock')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'system')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'neutral')
++  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
++  await expect(page.getByRole('combobox', { name: 'Timezone', exact: true })).toHaveText('Local time')
++  await expect(page.getByRole('switch', { name: 'Seconds', exact: true })).toBeChecked()
++  const before = await preferenceStorageAudit(page)
++  expect(before.reads).toEqual(['showcase.clock.settings.v1'])
++  expect(before.writes).toEqual([])
++  expect((await context.cookies()).some(cookie => cookie.name === COOKIE_NAME)).toBe(false)
++  await page.getByRole('combobox', { name: 'Timezone', exact: true }).click()
++  await page.getByRole('option', { name: 'Tokyo', exact: true }).click()
++  await selectAppearance(page, 'Dark')
++  await selectAppearance(page, 'Ocean')
++  await changeLocale(page, 'zh-CN')
++  await page.evaluate(() => {
++    window.dispatchEvent(new Event('focus'))
++    document.dispatchEvent(new Event('visibilitychange'))
++  })
++  const after = await preferenceStorageAudit(page)
++  expect(after.reads.every(key => key === 'showcase.clock.settings.v1')).toBe(true)
++  expect(after.writes.every(key => key === 'showcase.clock.settings.v1' || key === COOKIE_NAME)).toBe(true)
++  expect(after.records).toEqual(before.records)
++  expect((await context.cookies()).find(cookie => cookie.name === 'locale')?.value).toBe('zh-CN')
++  expect(errors).toEqual([])
++  await captureState(page, info, 'old-and-private-records-ignored')
++})
++
++test('current UI and clock settings survive without reading other keys', async ({ page, context }) => {
++  const errors = watchErrors(page)
++  await setSharedCookie(context)
++  await auditPreferenceStorage(page, true)
++  await page.goto('/clock')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'dark')
++  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
++  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
++  await expect(page.getByRole('combobox', { name: '时区', exact: true })).toHaveText('协调世界时')
++  await expect(page.getByRole('button', { name: '12 小时', exact: true })).toHaveAttribute('aria-pressed', 'true')
++  await expect(page.getByRole('switch', { name: '显示秒数', exact: true })).not.toBeChecked()
++  const before = await preferenceStorageAudit(page)
++  expect(before.reads).toEqual(['showcase.clock.settings.v1'])
++  expect(before.writes).toEqual([])
++  await changeLocale(page, 'en')
++  const saved = (await context.cookies()).find(cookie => cookie.name === COOKIE_NAME)?.value
++  await page.reload()
++  await expect(page.locator('html')).toHaveAttribute('lang', 'en')
++  await expect(page.getByRole('combobox', { name: 'Timezone', exact: true })).toHaveText('Coordinated Universal Time')
++  await expect(page.getByRole('button', { name: '12h', exact: true })).toHaveAttribute('aria-pressed', 'true')
++  expect((await context.cookies()).find(cookie => cookie.name === COOKIE_NAME)?.value).toBe(saved)
++  const after = await preferenceStorageAudit(page)
++  expect(after.reads).toEqual(['showcase.clock.settings.v1'])
++  expect(after.writes).toEqual([])
++  expect(after.records).toEqual(before.records)
++  expect(errors).toEqual([])
++})
+diff --git a/tests/frontend-policy.test.ts b/tests/frontend-policy.test.ts
+new file mode 100644
+index 0000000..9575f45
+--- /dev/null
++++ b/tests/frontend-policy.test.ts
+@@ -0,0 +1,34 @@
++import assert from 'node:assert/strict'
++import { test } from 'node:test'
++import { readPreferenceCookie } from '@ztd-me/frontend'
++import { showcasePreferencePolicy } from '../lib/frontend-policy.ts'
++
++test('production keeps the current shared cookie and notification key with explicit secure domain', () => {
++  const policy = showcasePreferencePolicy('production')
++  assert.deepEqual(policy, {
++    name: 'ztd.frontend.v1',
++    domain: 'ztd.me',
++    secure: true,
++    mirrorKey: 'ztd.frontend.v1',
++  })
++  const value = { version: 1, mode: 'dark', palette: 'ocean', locale: 'zh-CN' }
++  const cookie = `ztd.frontend.v1=${encodeURIComponent(JSON.stringify(value))}`
++  assert.deepEqual(readPreferenceCookie(cookie, policy).preferences, value)
++}).catch((error: unknown) => { throw error })
++
++test('preview and development policies stay host-only with independent current cookie names', () => {
++  for (const environment of ['preview', 'development'] as const) {
++    const policy = showcasePreferencePolicy(environment)
++    assert.ok(!Object.hasOwn(policy, 'domain'))
++    assert.ok(policy.name === `ztd.frontend.${environment}.showcase.v1`)
++    assert.equal(policy.mirrorKey, policy.name)
++    const expected: unknown = environment === 'preview'
++    assert.equal(policy.secure, expected)
++  }
++}).catch((error: unknown) => { throw error })
++
++test('isolated policies do not accept production values or unrelated locale cookies', () => {
++  const cookie = `ztd.frontend.v1=${encodeURIComponent(JSON.stringify({ version: 1, locale: 'zh-CN' }))}; locale=zh-CN`
++  assert.equal(readPreferenceCookie(cookie, showcasePreferencePolicy('preview')).status, 'missing')
++  assert.equal(readPreferenceCookie(cookie, showcasePreferencePolicy('development')).status, 'missing')
++}).catch((error: unknown) => { throw error })

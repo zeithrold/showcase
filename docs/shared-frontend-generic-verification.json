@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "toolsSource": "757ecc6ae77a361680efb9e5875815ff28a65146",
+  "toolsTree": "776a4da6c53bca8f085771ce48e93e2c92360c6b",
+  "toolsCI": "https://github.com/zeithrold/tools/actions/runs/37084179231",
+  "consumerBaseline": "e9c892761008600fa3caf9e70b2ab69056ff06cc",
+  "frontendVersion": "0.2.0",
+  "frontendChecksVersion": "0.1.1",
+  "archiveSHA256": "0dbe39fb76dbfd7d45a3d581fb4b66f9e5546ff4736c9e85028874377fda6c5c",
+  "archiveSHA512": "1c9fadb00b91cc0ccce274474b431c06176a3bb10830b622fe32e687c729fa6878dad68934ad3a67bdfdff9c7118a050234ff1b50a4a9d559e195452a65b7ce3",
+  "matchesParentVerifiedArchive": true,
+  "node": "24.19.0",
+  "pnpm": "11.22.0",
+  "ztSource": "3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f",
+  "sourceFrozenInstall": "passed",
+  "consumerFrozenInstall": "passed",
+  "sourceUnmodified": true,
+  "consumerRadixPatched": false,
+  "nativeGates": {
+    "lint": "passed",
+    "css": "passed",
+    "typecheck": "passed",
+    "unit": "passed",
+    "build": "passed",
+    "e2e": "passed",
+    "a11y": "passed"
+  },
+  "lintWarnings": 0,
+  "unitTests": 20,
+  "browser": {
+    "regression": {
+      "startTime": "2026-10-03T01:17:26.767Z",
+      "duration": 32301.412000000004,
+      "expected": 51,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "boundaries": {
+      "startTime": "2026-10-03T01:18:00.005Z",
+      "duration": 9830.962000000001,
+      "expected": 2,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "accessibility": {
+      "startTime": "2026-10-03T01:18:10.789Z",
+      "duration": 23535.338,
+      "expected": 7,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "axeScans": 33,
+  "axeViolations": 0,
+  "failureEvidenceProbe": "passed",
+  "legacyReadWriteAudit": "passed; attempts recorded even when storage errors are caught",
+  "currentFormatPreservation": "passed",
+  "productionSharingPreviewDevelopmentIsolation": "passed on intercepted local Worker origins",
+  "ssrCacheAndDeniedStorageRecovery": "passed",
+  "patchSHA256": "d72ebc670f03d4e421e3bb50710359ebd003402f63fd7d0c3c08e9d15ac48c44",
+  "retainedArtifacts": ".zt/artifacts/frontend-generic-757ecc6",
+  "publishedAdoption": "blocked pending owner merge/promotion and successful frontend 0.2.0 public registry smoke"
+}
