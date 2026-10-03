@@ -3,6 +3,7 @@
   "name": "showcase",
   "account_id": "a0df2e968b524bdd77c0eab565058522",
   "routes": [{ "pattern": "showcase.ztd.me", "custom_domain": true }],
+  "vars": { "SHOWCASE_FRONTEND_ENVIRONMENT": "production" },
   "compatibility_date": "2026-10-01",
   "compatibility_flags": [
     "nodejs_compat"

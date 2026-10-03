@@ -1,36 +1,36 @@
 'use client'
 
+import type { LinkProps } from '@ztd-me/frontend'
 import type { JSX, ReactNode } from 'react'
-import { ArrowUpRight } from 'lucide-react'
+import { PublicShell, useFrontendPreferences } from '@ztd-me/frontend/client'
+import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { SiteHeader } from '@/components/site-header'
+import { ShowcaseMark } from '@/components/showcase-mark'
+import { ProjectActions } from '@/components/site-header'
 
 export { IconButton } from '@/components/icon-button'
 
+function ProjectLink(props: LinkProps): JSX.Element {
+  const { t } = useTranslation()
+  return <Link {...props} aria-label={props.href === '/' ? t('a11y.home') : props['aria-label']} />
+}
+
 export function SiteShell({ children, directory = false }: { children: ReactNode, directory?: boolean }): JSX.Element {
   const { t } = useTranslation()
+  const { persistence } = useFrontendPreferences()
   return (
-    <>
-      <a className="skip-link" href="#main-content">{t('a11y.skip')}</a>
-      <div className="site-shell">
-        <SiteHeader directory={directory} />
-        <main id="main-content" tabIndex={-1}>{children}</main>
-        <footer className="site-footer">
-          <span>
-            {t('footer.credit')}
-            {' '}
-            <a href="https://ztd.me" target="_blank" rel="noreferrer">
-              Zeithrold
-              <ArrowUpRight size={12} />
-            </a>
-          </span>
-          <span className="footer-right">
-            <span className="footer-dot" />
-            {' '}
-            {t('footer.progress')}
-          </span>
-        </footer>
+    <PublicShell
+      brand={{ label: 'zeithrold/showcase', homeHref: '/', mark: <ShowcaseMark /> }}
+      repositoryUrl="https://github.com/zeithrold/showcase"
+      mainId="main-content"
+      linkComponent={ProjectLink}
+      projectActions={<div className="desktop-project-actions"><ProjectActions directory={directory} /></div>}
+    >
+      <div className="site-content">
+        <div className="mobile-project-actions"><ProjectActions directory={directory} /></div>
+        {persistence === 'unavailable' && <p role="status">{t('settings.persistenceUnavailable')}</p>}
+        {children}
       </div>
-    </>
+    </PublicShell>
   )
 }

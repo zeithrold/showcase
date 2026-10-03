@@ -1,156 +1,102 @@
-# Shared frontend migration preparation
+# Published shared frontend integration
 
-Source baseline: `a1ef35eb111bd53dedc083b965f30fb4e0ecfee1` (current main after PR #3).
-Preparation branch: `chore/shared-frontend-migration`.
+Baseline: Showcase main `d6d78dfb896eb4ee18bbf188d211b6a6a0669ccc` (PR #4).
+This application uses the promoted public registry releases `@ztd-me/frontend@0.1.0`
+and `@ztd-me/frontend-checks@0.1.1` with a real frozen pnpm lockfile. The owner verified
+both registry archives against tools `de4ec8fdab86c40789fdf02b82601350a12e111d` CI artifacts before integration.
+The retained candidate patch and receipt have been replaced by active application code and tests.
 
-The stable contract is verified at tools source
-`20fd45036ba6a723d061afc5be2e928ab64157c9`: [consumer README](https://github.com/zeithrold/tools/blob/20fd45036ba6a723d061afc5be2e928ab64157c9/packages/frontend/README.md),
-[draft PR #8](https://github.com/zeithrold/tools/pull/8) and
-[six passing CI jobs](https://github.com/zeithrold/tools/actions/runs/37040530960).
-The owner must still merge, stage and promote frontend 0.1.0 and frontend-checks 0.1.1, followed by both registry smoke checks.
-This preparation adds no dependency placeholder, local shared-shell implementation or vendored artifact.
+## Ownership and behavior
 
-## Approved target
+The published package owns the public shell, skip link, appearance/locale controls, Inter font,
+footer and validated UI preference schema. The footer contains © Zeithrold, the Showcase GitHub
+repository and hello@ztd.me. Showcase owns both routes, content, About dialog, project-only navigation,
+brand mark, DM Sans clock typography, assets and clock interactions. On screens below 640px, Pages
+and About remain visible in a compact toolbar immediately below the shared header.
 
-Use the shared shadcn/Radix shell with neutral grayscale as the default and retain Terracotta,
-Moss, Ocean, Plum and Graphite as selectable palettes. Support light, dark and system modes,
-with system as the default. Share only non-sensitive appearance and UI locale across ztd.me
-subdomains, with validated/versioned data, coherent SSR/hydration, storage-failure recovery and
-local/preview isolation. Keep timezone, clock format and seconds settings local to Showcase.
+The approved defaults are Neutral + System. Terracotta, Moss, Ocean, Plum and Graphite remain
+selectable in light, dark and system modes. English and Simplified Chinese application content,
+metadata and clock formatting follow the shared UI locale. Root attributes and CSS media queries
+render coherent appearance and translations before JavaScript, including system dark mode.
+The consumer locale adapter preserves Showcase's previous Chinese browser-language fallback
+(including zh-TW/zh-Hant), while retaining Accept-Language quality ordering.
 
-The shared footer must include © Zeithrold, this repository's GitHub link and hello@ztd.me.
-Preserve both routes, application copy, assets, clock functionality and project-specific controls.
-Keep header navigation scoped to Showcase's pages; do not add a cross-site navigation menu.
-Authentication, account data and business state must never enter shared preference storage.
+`app/layout.tsx` resolves the request cookie and language using server-safe package exports.
+It passes the same snapshot to document attributes, metadata, translations and the client adapter.
+`components/frontend-adapter.tsx` owns the routing/framework boundary and fullscreen portal container.
+Clock business tokens reference the package's declared semantic tokens; the Tailwind dark variant
+uses `data-frontend-mode`. The CSS checker includes the actual package declaration file.
 
-## Replacement points
+`lib/clock-settings-store.ts` validates and owns only timezone, format and seconds. It reads the
+legacy `showcase.clock.v1` record when the current record is absent, preserves that record, and
+writes `{ version: 1, timezone, format, seconds }` under `showcase.clock.settings.v1` after an
+explicit clock update. The published provider separately migrates only valid legacy UI fields.
+Clock data, private data and unknown fields never enter shared UI persistence. Obsolete combined
+preference state, palette definitions, chrome styles and the redundant direct Inter dependency
+have been removed. Existing clock formatting signatures and timezone choices remain intact.
 
-| Existing owner | Integration work after publication |
-| --- | --- |
-| `app/layout.tsx` | Install the verified package CSS and provider at the vinext boundary; retain metadata and local fonts/assets. |
-| `components/site-shell.tsx` | Use the published shell/main/skip-link/footer contract with the required repository and email destinations. |
-| `components/site-header.tsx` | Use shared appearance/locale controls; retain project home/pages links and About content without cross-site menus. |
-| `components/palette-picker.tsx` | Replace duplicated shared appearance controls through the actual exported package API. |
-| `components/preferences-provider.tsx` | Give appearance and locale ownership to the package; retain project clock state and localized metadata updates. |
-| `lib/preferences-context.ts` / `lib/preferences-store.ts` | Separate the local clock store from shared appearance state; preserve existing users' validated clock settings. |
-| `components/i18n-provider.tsx` / `lib/i18n.ts` | Bridge the verified UI-locale contract to project translation resources and localized clock formatting. |
-| `lib/clock-settings.ts` | Keep the clock-only schema and whitelist local; never send its fields to a shared cookie or store. |
-| `components/clock-page.tsx` / `components/clock/` / `lib/use-clock-actions.ts` | Read local time controls and the verified locale adapter while retaining timers, copy, fullscreen, progress and world clocks. |
-| `app/globals.css` / `lib/palettes.ts` / `components/ui/` | Remove duplicated shell/theme ownership after verifying actual CSS and primitive exports; retain clock-specific tokens, responsive layout and reduced motion. |
+## Deployment and storage boundaries
 
-The legacy `showcase.clock.v1` record currently combines timezone/format/seconds with
-appearance/locale. `readClockSettings` projects and validates only its three business fields;
-existing imports through `lib/clock.ts` remain compatible during preparation. The existing
-record and runtime appearance defaults remain unchanged until published-package integration.
+The non-sensitive `SHOWCASE_FRONTEND_ENVIRONMENT` application setting selects production only
+when explicitly configured, using trusted `showcase.ztd.me`; forwarded Host headers cannot enable
+production policy. The production Worker sets this value. Local `pnpm start` explicitly selects
+development; unknown settings select preview.
 
-## Prepared integration
+Production HTTPS uses `ztd.frontend.v1; Domain=ztd.me; Path=/; SameSite=Lax; Secure` with a one-year
+maximum age. It stores exactly `{ version: 1, mode, palette, locale }`; every sibling can overwrite
+this untrusted UI cookie. It is never an authorization source. Sharing across subdomains refreshes
+on focus or visibility, rather than relying on cross-origin localStorage notifications.
 
-`lib/clock-settings-store.ts` is ready to own only clock settings. It reads the legacy record
-when a current clock record is absent, preserves that legacy record for the shared provider's
-UI migration, and writes only `{ version: 1, timezone, format, seconds }` under
-`showcase.clock.settings.v1` after an explicit clock update. Corrupt/future records are not
-automatically overwritten. Storage failures preserve usable controls and mounted stores remain isolated.
+Preview uses a secure host-only `ztd.frontend.preview.showcase.v1` cookie and ignores the production
+key, including when a preview is hosted under ztd.me. Development uses the isolated host-only
+`ztd.frontend.development.showcase.v1` key without Secure on HTTP localhost. Denied cookies/storage
+retain usable in-memory controls and observable persistence feedback; recovery re-reads valid
+persisted UI selections. Future versions are not automatically rewritten by clock updates.
 
-The unapplied `docs/shared-frontend-integration.patch` contains consumer adapters against the
-verified contract. It prepares these changes without making the active checkout depend on an
-unpublished package:
+The existing main-only deployment guard, routes, permissions, credentials and dependency policies
+are preserved. No manual deployment or merge is part of this integration. PR checks build and run
+Workers locally; a feature branch or PR cannot deploy production.
 
-- Resolve the request cookie and Accept-Language through the server-safe root exports.
-- Pass exactly that snapshot into the document attributes, metadata, translation instance and provider.
-- Use `PublicShell`, its fixed project footer, shared locale/appearance controls and routing adapter.
-- Keep Showcase's home/pages links, About content and brand mark in consumer-owned slots.
-- Bridge the resolved mode, shared locale and palette to the existing clock context and tokens.
-- Give the shared provider the active fullscreen portal container and show actual persistence failures.
-- Read an explicit application deployment mode rather than forwarded Host headers for cookie policy.
+## Reproducible verification
 
-The proposed non-sensitive `SHOWCASE_FRONTEND_ENVIRONMENT` application setting selects production
-only when explicitly configured, using the trusted `showcase.ztd.me` hostname. Unknown configurations
-fall back to preview policy; local development uses its isolated namespace. The patch sets the
-production Worker value and overrides local `pnpm start` to development. This uses the existing
-Node compatibility behavior documented in [Cloudflare environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/#environment-variables-and-nodejs-compatibility).
-No deployment route, credential, grant, CSP or CI deployment guard is changed.
+Use the declared pnpm 11.22.0, Node 24, Playwright 1.62.0 Chromium and the CI-pinned zt CLI.
 
-The corrected patch passes all native gates against exact-source packed candidates in a disposable
-checkout. It includes adapted browser selectors, root attributes and regressions for SSR/cache,
-system mode, cookie/legacy precedence, local cookie isolation, denied storage/recovery, fullscreen
-menus and compact mobile project controls. It preserves Pages and About in a toolbar below the
-shared header on narrow screens; both controls remain visible and usable. The dark Tailwind variant
-uses the server-rendered mode attributes and the fixed frontend-checks 0.1.1 custom-variant support.
+```sh
+pnpm install --frozen-lockfile
+pnpm check
+pnpm test:evidence
+```
 
-After the parent's public-registry smoke succeeds for both packages, inspect their promoted artifacts,
-install the exact verified versions with pnpm, apply the patch and repeat final verification.
-Production sharing/preview deployment behavior and final published dependencies still require their
-consumer checks. Remove obsolete chrome CSS and redundant dependencies using the real registry lockfile.
+The seven required native gates remain strict ESLint with zero warnings, CSS, TypeScript,
+unit tests, production Worker build, browser regressions and full-page Axe scenarios.
+`pnpm test:browser` also runs `pnpm test:preferences`, which starts separate local production
+and preview Workers. Synthetic HTTPS Showcase/sibling/preview origins proxy only those local
+Workers: they verify actual cookie scope, locale/appearance sharing, SSR, reload/focus recovery,
+preview isolation and origin-local clock/private records without contacting live sites.
 
-## Verification checklist
+Reports, full Axe scans, named captures and failure traces/videos are retained under `.zt/artifacts/`
+and uploaded by the existing always-run CI evidence step. The deliberate failure probe must retain
+its evidence and mark the later required gate as not run. Browser coverage includes SSR/cache,
+system changes, six palettes, both locales, storage failures, keyboard focus, menus/dialogs,
+fullscreen, timers, copy, reduced motion, narrow layout and enlarged text.
 
-- Install the parent's verified published version with pnpm and commit its real registry lockfile.
-- Inspect actual README, exports, declarations, peers, CSS and preference schema; use no inferred APIs.
-- Verify supported hosts and cookie/storage attributes from the stable contract before integration.
-- Test legacy clock preservation, unknown/stale shared values, storage/cookie failures and request isolation.
-- Exercise neutral plus all five retained palettes in light/dark/system, OS changes and UI locale changes.
-- Test non-sensitive synchronization across intercepted test origins and isolation on local/preview hosts.
-- Verify hydration, both locales, footer destinations, project-only navigation, keyboard focus and Axe states.
-- Preserve every clock interaction, reduced motion, responsive fit, local assets and recovery fallback.
-- Run frozen install, strict ESLint/CSS/types, unit tests, build, browser/Axe and failure-evidence checks.
-- Retain evidence through the existing `zt` profile and always-run CI upload; verify the exact pushed head.
-- Keep the existing main-only deployment boundary, `@ztd-me/*` age exception and every other dependency protection.
+These checks prove the selected Chromium states and local built-Worker boundaries. They do not
+claim deployed cross-site traffic, other browser engines, assistive-technology certification,
+performance budgets or visual baseline comparisons. Exact-head CI remains required for review.
 
-The current preparation regressions cover clock-only legacy validation, separation from private
-and appearance fields, all supported timezones, independent app stores, clock preservation when
-appearance/locale changes, and project-only header navigation. Cross-site sharing, neutral/system
-behavior have now been exercised in the packed candidate checkout as recorded below. Final public-registry
-installation and deployment-specific sharing checks remain pending.
+## Final local validation
 
-## Preparation validation
+On 2026-10-03, frozen registry installation and all seven native frontend gates passed under
+Node 24.19.0 / pnpm 11.22.0 / zt `3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f`:
+zero-warning ESLint, native CSS, TypeScript, 17 unit tests, production Worker build,
+49 main Chromium regressions plus two production/preview boundary regressions, and seven
+accessibility scenarios containing 33 complete Axe scans with zero violations.
+No browser test was skipped, unexpected or flaky. The obsolete combined-store tests were replaced
+by clock-only boundary coverage and browser checks of the actual shared provider.
 
-On 2026-10-02, the frozen pnpm install and all seven native frontend gates passed: strict lint
-with zero warnings, CSS lint, type checks, 22 unit tests, the production Worker build, 35 browser
-regressions and 6 accessibility scenarios covering 26 Axe scans. The new named clock capture
-confirms Chinese locale, Ocean/dark appearance and preserved Tokyo/12-hour/seconds-off controls.
-The intentional failure-evidence probe also passed, verifying Axe, screenshot, trace, video and
-report retention. Evidence is retained locally under `.zt/artifacts/check-3091914893` and
-`.zt/artifacts/failure-probe/check-3298227216`.
-
-This validates the preparation against current dependencies. Package integration and its new
-sharing/default-mode behavior still require the verified published contract, a fresh frozen
-install, final checks and exact-head PR CI. The deployment workflow and dependency protections
-are unchanged; deployment remains restricted to this repository's main-branch push events.
-
-## Exact-source packed candidate revalidation
-
-Tools source `20fd45036ba6a723d061afc5be2e928ab64157c9` was downloaded through its exact commit
-archive and packed without source changes. Frontend 0.1.0 and frontend-checks 0.1.1 were installed
-only in a disposable Showcase checkout at baseline `1376fee9dc0243ec1edd05d0206854209854d294`.
-Both source installs and the packed consumer's subsequent frozen install passed with age, integrity,
-no-downgrade and build restrictions intact. The independent consumer uses unpatched Radix dependencies.
-
-All seven native gates pass: zero-warning ESLint, CSS lint, type checks, 22 unit tests, production
-Worker build, 46 Chromium regressions and seven accessibility scenarios covering 33 complete Axe
-scans with zero violations. The failure-evidence probe passes. A CSS negative control still rejects
-an unscoped nesting selector outside `custom-variant`, confirming that the compatibility allowance
-has not disabled the native rule.
-
-Coverage includes denied cookie reads/writes plus denied localStorage on desktop and mobile;
-recovery through focus; preserved SSR appearance/locale and usable clock controls; optional mirror
-failure with successful cookie persistence; language-dependent SSR and private/no-store cache
-behavior; system-dark content/colors before application JavaScript; OS changes and explicit-mode
-independence; all six palettes in both modes; legacy clock preservation; future-cookie retention;
-local isolation from production cookie names and forwarded hosts; keyboard focus and fullscreen
-appearance portals. Visual review caught an overly tall mobile brand layout; consumer project
-controls now move below the shared header at narrow widths, with height and interaction regressions.
-
-No package contract blocker remains. The adapter's synchronous-effect state update, nested ternary,
-CSS specificity/order errors and keyboard-test timing were corrected without weakening policy.
-The persistent application, dependency manifest/lockfile, runtime configuration and workflow are
-unchanged; only the unapplied patch and verification evidence are updated.
-
-See `docs/shared-frontend-candidate-verification.json` for archive SHA-256/SHA-512, native statuses,
-browser statistics and the tested patch checksum. Reports, captures, scans, logs, trace/video
-failure-probe evidence and the negative control remain under `.zt/artifacts/frontend-candidate-20fd4503`.
-These checks establish packed-candidate compatibility; they do not clear owner promotion or final
-public-registry smoke requirements. No candidate tarball or disposable lockfile is committed.
-
-All repository documentation, commit and PR text is English; supported application translations
-remain bilingual. No merges, manual deployment, credential changes or npm promotion are part of
-this task. Visual baselines and performance budgets remain deferred.
+The deliberate failure-evidence probe passed, retaining full Axe results, capture, screenshot,
+trace, video and HTML/JSON reports while preventing the later required gate from running.
+Local evidence is retained in `.zt/artifacts/check-3497265220/report.json` and
+`.zt/artifacts/failure-probe/check-759054578/report.json`. Named mobile-directory and Chinese
+Ocean/dark clock captures were visually reviewed. These are local final-integration results;
+the draft PR's independent full CI and artifacts provide the exact pushed-revision evidence.

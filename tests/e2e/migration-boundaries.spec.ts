@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { captureClockState, openClock, watchErrors } from './helpers'
+import { captureClockState, openClock, selectAppearance, watchErrors } from './helpers'
 
 test('header navigation stays within the current showcase routes', async ({ page }) => {
   for (const route of ['/', '/clock']) {
@@ -23,8 +23,8 @@ test('appearance changes preserve clock controls through navigation and reload',
   await page.getByRole('option', { name: 'Tokyo', exact: true }).click()
   await page.getByRole('button', { name: '12h', exact: true }).click()
   await page.getByRole('switch', { name: 'Seconds' }).click()
-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
-  await page.getByRole('button', { name: 'Ocean', exact: true }).click()
+  await selectAppearance(page, 'Dark')
+  await selectAppearance(page, 'Ocean')
   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
   await page.getByRole('option', { name: '简体中文' }).click()
   await page.getByRole('link', { name: '所有页面', exact: true }).click()
@@ -36,7 +36,7 @@ test('appearance changes preserve clock controls through navigation and reload',
   await expect(page.getByRole('button', { name: '12 小时', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await expect(page.getByRole('switch', { name: '显示秒数', exact: true })).not.toBeChecked()
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
   await expect(page.locator('html')).toHaveClass('dark')
   expect(errors).toEqual([])
   await captureClockState(page, testInfo, 'clock-controls-after-appearance-change')

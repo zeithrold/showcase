@@ -55,6 +55,8 @@ export const zhCN = {
   'settings.seconds': '显示秒数',
   'settings.motion': '一点流动，一点宁静。',
   'settings.palette': '配色',
+  'settings.persistenceUnavailable': '外观和语言更改在本次访问中有效，但无法保存。',
+  'palette.neutral': '中性',
   'palette.terracotta': '暖陶',
   'palette.moss': '苔绿',
   'palette.ocean': '海蓝',

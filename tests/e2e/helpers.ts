@@ -47,3 +47,14 @@ export async function captureClockState(page: Page, testInfo: TestInfo, label: s
   })
   await captureState(page, testInfo, label)
 }
+
+export async function selectAppearance(
+  page: Page,
+  option: string,
+  within = page.getByRole('banner'),
+): Promise<void> {
+  const locale = await page.locator('html').getAttribute('lang')
+  await within.getByRole('button', { name: locale === 'zh-CN' ? '外观' : 'Appearance', exact: true }).click()
+  await page.getByRole('menuitemradio', { name: option, exact: true }).click()
+  await expect(page.getByRole('menu')).not.toBeVisible()
+}

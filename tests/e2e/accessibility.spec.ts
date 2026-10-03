@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test'
 import { assertAccessible, captureState } from '@ztd-me/frontend-checks/playwright'
-import { openClock } from './helpers'
+import { openClock, selectAppearance } from './helpers'
 
 const palettes = [
+  'Neutral',
   'Terracotta',
   'Moss',
   'Ocean',
@@ -20,12 +21,11 @@ for (const route of ['/', '/clock']) {
         await page.goto('/')
       }
       if (theme === 'dark') {
-        await page.getByRole('button', { name: 'Switch to dark theme' }).click()
+        await selectAppearance(page, 'Dark')
       }
       for (const palette of palettes) {
-        const swatch = page.getByRole('button', { name: palette, exact: true })
-        await swatch.click()
-        await expect(swatch).toHaveAttribute('aria-pressed', 'true')
+        await selectAppearance(page, palette)
+        await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', palette.toLowerCase())
         await assertAccessible(page, testInfo, { label: `${route}-${theme}-${palette}` })
         await captureState(page, testInfo, `${theme}-${palette}`)
       }

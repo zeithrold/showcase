@@ -92,3 +92,28 @@ test('clock stores isolate each mounted application', () => {
   firstUnsubscribe()
   secondUnsubscribe()
 }).catch((error: unknown) => { throw error })
+
+test('clock listeners unsubscribe and resubscription preserves the restored snapshot', () => {
+  const store = createClockSettingsStore(memoryStorage())
+  let first = 0
+  let second = 0
+  const unsubscribeFirst = store.subscribe(() => {
+    first++
+  })
+  const unsubscribeSecond = store.subscribe(() => {
+    second++
+  })
+  store.update({ timezone: 'UTC' })
+  unsubscribeFirst()
+  store.update({ format: '12', seconds: false })
+  assert.equal(first, 2)
+  assert.equal(second, 2)
+  const snapshot = store.getSnapshot()
+  const unsubscribe = store.subscribe(() => {
+    throw new Error('Resubscribing must not reset clock settings')
+  })
+  assert.ok(Object.is(store.getSnapshot(), snapshot))
+  assert.deepEqual(snapshot.settings, { timezone: 'UTC', format: '12', seconds: false })
+  unsubscribeSecond()
+  unsubscribe()
+}).catch((error: unknown) => { throw error })
