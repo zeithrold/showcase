@@ -13,12 +13,13 @@ test('production UI shares on focus while clock and private data stay local', as
     watchErrors(sibling),
   ]
   await showcase.addInitScript(() => {
-    localStorage.setItem('showcase.clock.v1', JSON.stringify({
+    localStorage.setItem('showcase.clock.settings.v1', JSON.stringify({
+      version: 1,
       timezone: 'Asia/Tokyo',
       format: '12',
       seconds: false,
-      token: 'synthetic-private',
     }))
+    localStorage.setItem('synthetic.business.record', JSON.stringify({ token: 'synthetic-private' }))
   })
   await sibling.goto(`${SIBLING_ORIGIN}/clock`)
   await showcase.goto(`${SHOWCASE_ORIGIN}/clock`)
@@ -47,8 +48,8 @@ test('production UI shares on focus while clock and private data stay local', as
   await showcase.reload()
   await expectSharedState(showcase, 'moss', 'en')
   await expect(showcase.getByRole('combobox', { name: 'Timezone', exact: true })).toHaveText('Tokyo')
-  const legacy = await showcase.evaluate(() => localStorage.getItem('showcase.clock.v1'))
-  expect(legacy).toContain('synthetic-private')
+  const privateRecord = await showcase.evaluate(() => localStorage.getItem('synthetic.business.record'))
+  expect(privateRecord).toContain('synthetic-private')
   expect(errors).toEqual([
     [],
     [],

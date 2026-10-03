@@ -7,7 +7,6 @@ interface ClockStorage {
 }
 
 export const CLOCK_SETTINGS_KEY = 'showcase.clock.settings.v1'
-const LEGACY_KEY = 'showcase.clock.v1'
 const SERVER_SNAPSHOT = { settings: DEFAULT_CLOCK_SETTINGS, ready: false }
 type Snapshot = typeof SERVER_SNAPSHOT
 
@@ -26,7 +25,7 @@ function restoreSettings(storage: ClockStorage): ClockSettings {
   if (typeof current === 'object' && current !== null && 'version' in current && current.version === 1) {
     return readClockSettings(current)
   }
-  return readClockSettings(readStorage(storage, LEGACY_KEY))
+  return DEFAULT_CLOCK_SETTINGS
 }
 
 export function createClockSettingsStore(storage: ClockStorage): {

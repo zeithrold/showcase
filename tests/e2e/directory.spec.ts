@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { captureState } from '@ztd-me/frontend-checks/playwright'
 import { selectAppearance } from './helpers'
-import { changeLocale } from './shared-fixtures'
+import { changeLocale, setSharedCookie } from './shared-fixtures'
 
 test('shared footer keeps the copyright and project destinations in both locales', async ({ page }) => {
   await page.goto('/')
@@ -86,12 +86,10 @@ for (const width of [
   390,
   320,
 ]) {
-  for (const language of ['en', 'zh-CN']) {
-    test(`directory fits ${width}px in ${language}`, async ({ page }) => {
+  for (const language of ['en', 'zh-CN'] as const) {
+    test(`directory fits ${width}px in ${language}`, async ({ page, context }) => {
       await page.setViewportSize({ width, height: 900 })
-      await page.addInitScript((locale) => {
-        localStorage.setItem('showcase.clock.v1', JSON.stringify({ locale }))
-      }, language)
+      await setSharedCookie(context, { version: 1, mode: 'system', palette: 'neutral', locale: language })
       await page.goto('/')
       await expect(page.locator('html')).toHaveAttribute('lang', language)
       const widths = await page.evaluate(() => ({

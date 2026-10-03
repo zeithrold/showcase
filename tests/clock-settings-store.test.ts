@@ -13,7 +13,7 @@ function memoryStorage(records: Record<string, string> = {}): {
   }
 }
 
-test('clock migration preserves legacy UI and private fields without rewriting them', () => {
+test('clock settings never read or rewrite other stored records', () => {
   const legacy = JSON.stringify({
     timezone: 'Asia/Tokyo',
     format: '12',
@@ -22,23 +22,35 @@ test('clock migration preserves legacy UI and private fields without rewriting t
     token: 'private',
   })
   const storage = memoryStorage({ 'showcase.clock.v1': legacy })
-  const store = createClockSettingsStore(storage)
+  const reads: string[] = []
+  const store = createClockSettingsStore({
+    getItem: (key) => {
+      reads.push(key)
+      return storage.getItem(key)
+    },
+    setItem: (key, value) => {
+      assert.equal(key, CLOCK_SETTINGS_KEY)
+      storage.setItem(key, value)
+    },
+  })
   const unsubscribe = store.subscribe(() => {})
-  assert.deepEqual(store.getSnapshot().settings, { timezone: 'Asia/Tokyo', format: '12', seconds: false })
+  assert.deepEqual(store.getSnapshot().settings, { timezone: 'local', format: '24', seconds: true })
   assert.equal(storage.getItem(CLOCK_SETTINGS_KEY), null)
   store.update({ timezone: 'UTC' })
   assert.deepEqual(JSON.parse(storage.getItem(CLOCK_SETTINGS_KEY) ?? '{}'), {
     version: 1,
     timezone: 'UTC',
-    format: '12',
-    seconds: false,
+    format: '24',
+    seconds: true,
   })
   const expected: unknown = legacy
   assert.equal(storage.getItem('showcase.clock.v1'), expected)
+  assert.equal(reads.length, 1)
+  assert.equal(reads[0], CLOCK_SETTINGS_KEY)
   unsubscribe()
 }).catch((error: unknown) => { throw error })
 
-test('new clock settings win over stale legacy settings', () => {
+test('current clock settings restore independently of other stored values', () => {
   const storage = memoryStorage({
     [CLOCK_SETTINGS_KEY]: JSON.stringify({ version: 1, timezone: 'UTC', format: '24', seconds: true }),
     'showcase.clock.v1': JSON.stringify({ timezone: 'Asia/Tokyo', format: '12', seconds: false }),
@@ -49,7 +61,7 @@ test('new clock settings win over stale legacy settings', () => {
   unsubscribe()
 }).catch((error: unknown) => { throw error })
 
-test('malformed and future local records fall back without automatic overwrites', () => {
+test('malformed and future local records use defaults without automatic overwrites', () => {
   for (const saved of [
     '{invalid',
     JSON.stringify({ version: 2, timezone: 'UTC' }),
@@ -60,7 +72,7 @@ test('malformed and future local records fall back without automatic overwrites'
     })
     const store = createClockSettingsStore(storage)
     const unsubscribe = store.subscribe(() => {})
-    assert.equal(store.getSnapshot().settings.timezone, 'Europe/Paris')
+    assert.deepEqual(store.getSnapshot().settings, { timezone: 'local', format: '24', seconds: true })
     const expected: unknown = saved
     assert.equal(storage.getItem(CLOCK_SETTINGS_KEY), expected)
     unsubscribe()

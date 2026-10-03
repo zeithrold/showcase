@@ -37,8 +37,10 @@ for (const width of [1440, 320]) {
       palette: 'ocean',
       locale: 'en',
     })
-    const legacy = await page.evaluate((): unknown => JSON.parse(localStorage.getItem('showcase.clock.v1') ?? '{}'))
-    expect(legacy).toEqual({ timezone: 'Asia/Tokyo', token: 'synthetic-private' })
+    const privateRecord = await page.evaluate(
+      (): unknown => JSON.parse(localStorage.getItem('synthetic.business.record') ?? '{}'),
+    )
+    expect(privateRecord).toEqual({ token: 'synthetic-private' })
     expect(errors).toEqual([])
   })
 }

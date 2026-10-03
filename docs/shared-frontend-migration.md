@@ -1,4 +1,12 @@
-# Published shared frontend integration
+# Generic shared frontend correction preparation
+
+**PR #5 is blocked pending the generic package API, corrected publication and registry verification.**
+The owner requires no legacy storage-key mappings in the package or consumers. Current dependency
+`@ztd-me/frontend@0.1.0` cannot satisfy that requirement: its provider reads a project-specific legacy
+key during connection and exposes no opt-out. Its policy also uses the fixed `Project` union,
+`namespace` selection and a hard-coded ztd.me domain, while its footer assumes fixed destinations.
+These dependencies must be replaced through the precise generic API after the tools task defines it.
+No unpublished replacement or temporary tarball dependency is committed.
 
 Baseline: Showcase main `d6d78dfb896eb4ee18bbf188d211b6a6a0669ccc` (PR #4).
 This application uses the promoted public registry releases `@ztd-me/frontend@0.1.0`
@@ -27,10 +35,11 @@ It passes the same snapshot to document attributes, metadata, translations and t
 Clock business tokens reference the package's declared semantic tokens; the Tailwind dark variant
 uses `data-frontend-mode`. The CSS checker includes the actual package declaration file.
 
-`lib/clock-settings-store.ts` validates and owns only timezone, format and seconds. It reads the
-legacy `showcase.clock.v1` record when the current record is absent, preserves that record, and
-writes `{ version: 1, timezone, format, seconds }` under `showcase.clock.settings.v1` after an
-explicit clock update. The published provider separately migrates only valid legacy UI fields.
+`lib/clock-settings-store.ts` validates and owns only timezone, format and seconds. It reads only
+the current `showcase.clock.settings.v1` record and writes `{ version: 1, timezone, format, seconds }`
+under that same key after an explicit clock update. Absent, malformed and future records use defaults
+without automatic writes. No old-key fallback, conversion or deletion remains in this consumer.
+The current published provider's separate legacy UI migration remains a package blocker.
 Clock data, private data and unknown fields never enter shared UI persistence. Obsolete combined
 preference state, palette definitions, chrome styles and the redundant direct Inter dependency
 have been removed. Existing clock formatting signatures and timezone choices remain intact.
@@ -84,7 +93,7 @@ These checks prove the selected Chromium states and local built-Worker boundarie
 claim deployed cross-site traffic, other browser engines, assistive-technology certification,
 performance budgets or visual baseline comparisons. Exact-head CI remains required for review.
 
-## Final local validation
+## Previous published integration validation
 
 On 2026-10-03, frozen registry installation and all seven native frontend gates passed under
 Node 24.19.0 / pnpm 11.22.0 / zt `3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f`:
@@ -100,3 +109,24 @@ Local evidence is retained in `.zt/artifacts/check-3497265220/report.json` and
 `.zt/artifacts/failure-probe/check-759054578/report.json`. Named mobile-directory and Chinese
 Ocean/dark clock captures were visually reviewed. These are local final-integration results;
 the draft PR's independent full CI and artifacts provide the exact pushed-revision evidence.
+
+That validation belongs to commit `f84bc53bd39a23acb394dd199e3bfdda2fb52f0c`, whose
+[CI passed](https://github.com/zeithrold/showcase/actions/runs/37082237498) with deployment skipped.
+It establishes the previous contract's behavior, not compliance with the subsequent generic-only
+correction. The preparation removes consumer fallback reads, changes positive browser fixtures to
+current UI cookies/clock records, and retains negative tests proving unrelated old/private records
+are neither read by the clock store nor rewritten. Complete UI-level legacy-ignore coverage and
+generic policy/footer integration await the new API. Existing new-format preferences remain usable.
+
+## Generic correction preparation validation
+
+The consumer clock fallback removal and current-format fixture changes pass all seven native gates
+against the still-published frontend 0.1.0: zero-warning ESLint, CSS, types, 17 unit tests, production
+Worker build, 51 Chromium regressions and seven accessibility scenarios with 33 complete Axe scans
+and zero violations. The failure-evidence probe passes. Reports are retained in
+`.zt/artifacts/check-3784182436/report.json` and
+`.zt/artifacts/failure-probe/check-2689024628/report.json`.
+No application source maps or reads an old preference key. Such key references remain only in
+negative unit fixtures proving non-use/non-mutation. The upstream 0.1.0 provider's legacy path
+still blocks the complete requirement; generic-source validation and corrected registry adoption
+have not run because the precise API/release is pending. No old/private record has been deleted.

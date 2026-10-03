@@ -44,7 +44,7 @@ test('corrupt or unrecognized persisted preferences cannot break the clock', () 
   })
 }).catch((error: unknown) => { throw error })
 
-test('existing preferences migrate without resetting time controls', () => {
+test('current clock records retain supported time controls', () => {
   assert.deepEqual(readClockSettings({ timezone: 'Asia/Tokyo', format: '12', seconds: false, theme: 'dark' }), {
     timezone: 'Asia/Tokyo',
     format: '12',

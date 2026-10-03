@@ -25,7 +25,7 @@ export async function changeLocale(page: Page, locale: 'en' | 'zh-CN'): Promise<
 export async function denyStorage(page: Page, cookies = true): Promise<void> {
   await page.addInitScript((denyCookies) => {
     const storage = window.localStorage
-    storage.setItem('showcase.clock.v1', JSON.stringify({ timezone: 'Asia/Tokyo', token: 'synthetic-private' }))
+    storage.setItem('synthetic.business.record', JSON.stringify({ token: 'synthetic-private' }))
     const cookie = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
     Reflect.set(window, 'denyShowcaseStorage', true)
     const denied = () => Reflect.get(window, 'denyShowcaseStorage') === true

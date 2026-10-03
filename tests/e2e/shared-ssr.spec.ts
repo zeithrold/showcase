@@ -72,17 +72,15 @@ test('system changes update clock tokens while explicit mode and palette stay in
   expect(errors).toEqual([])
 })
 
-test('valid cookie wins over legacy appearance and preserves clock settings', async ({ page, context }) => {
+test('current UI cookie and clock settings restore independently', async ({ page, context }) => {
   const errors = watchErrors(page)
   await setSharedCookie(context)
   await page.addInitScript(() => {
-    localStorage.setItem('showcase.clock.v1', JSON.stringify({
+    localStorage.setItem('showcase.clock.settings.v1', JSON.stringify({
+      version: 1,
       timezone: 'Asia/Tokyo',
       format: '12',
       seconds: false,
-      theme: 'light',
-      palette: 'terracotta',
-      locale: 'en',
     }))
   })
   await page.goto('/clock')
