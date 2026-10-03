@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { openClock, watchErrors } from './helpers'
+import { openClock, selectAppearance, watchErrors } from './helpers'
 
 test('clock preferences still work when browser storage is unavailable', async ({ page }) => {
   const errors = watchErrors(page)
@@ -10,10 +10,10 @@ test('clock preferences still work when browser storage is unavailable', async (
   })
   await page.goto('/clock')
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', /^\d{2}:\d{2}:\d{2}/)
-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
-  await page.getByRole('button', { name: 'Ocean', exact: true }).click()
+  await selectAppearance(page, 'Dark')
+  await selectAppearance(page, 'Ocean')
   await expect(page.locator('html')).toHaveClass('dark')
-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
   await page.getByRole('option', { name: '简体中文' }).click()
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')

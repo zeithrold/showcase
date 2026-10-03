@@ -58,7 +58,9 @@ export const en = {
   'settings.12': '12h',
   'settings.seconds': 'Seconds',
   'settings.motion': 'A little motion. A little calm.',
+  'settings.persistenceUnavailable': 'Appearance and language changes work for this visit, but could not be saved.',
   'settings.palette': 'Color palette',
+  'palette.neutral': 'Neutral',
   'palette.terracotta': 'Terracotta',
   'palette.moss': 'Moss',
   'palette.ocean': 'Ocean',
@@ -88,5 +90,6 @@ export const en = {
     'Find your timezone. Go fullscreen. Make it yours. Your preferences stay with you, for '
     + 'the next time you drop by.',
   'footer.credit': 'Thoughtfully put together by',
+  'footer.source': 'GitHub repository',
   'footer.progress': 'Always a work in progress.',
 } as const

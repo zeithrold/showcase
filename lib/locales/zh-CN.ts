@@ -55,6 +55,8 @@ export const zhCN = {
   'settings.seconds': '显示秒数',
   'settings.motion': '一点流动，一点宁静。',
   'settings.palette': '配色',
+  'settings.persistenceUnavailable': '外观和语言更改在本次访问中有效，但无法保存。',
+  'palette.neutral': '中性',
   'palette.terracotta': '暖陶',
   'palette.moss': '苔绿',
   'palette.ocean': '海蓝',
@@ -80,5 +82,6 @@ export const zhCN = {
   'notes.everydayTitle': '留一小片空间，慢下来。',
   'notes.everydayBody': '选一个时区，进入全屏，调一组喜欢的颜色。偏好会留在浏览器里，等你下次再来。',
   'footer.credit': '用心设计与开发',
+  'footer.source': 'GitHub 仓库',
   'footer.progress': '持续打磨，慢慢生长。',
 } satisfies Record<keyof typeof en, string>

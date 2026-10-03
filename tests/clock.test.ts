@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { DEFAULT_PREFERENCES, formatClock, getClockParts, readPreferences } from '../lib/clock.ts'
-import { detectLocale } from '../lib/i18n.ts'
+import { negotiateLocale } from '@ztd-me/frontend'
+import { DEFAULT_CLOCK_SETTINGS, formatClock, getClockParts, readClockSettings } from '../lib/clock.ts'
+import { showcaseAcceptLanguage } from '../lib/frontend-locale.ts'
 
 test('midnight and noon use correct 12-hour periods', () => {
   assert.equal(formatClock(new Date('2026-10-01T00:00:00Z'), 'UTC', '12', true), '12:00:00 AM')
@@ -32,36 +33,32 @@ test('corrupt or unrecognized persisted preferences cannot break the clock', () 
     [],
     { timezone: 'Mars/Unknown', format: '13', seconds: 'false', theme: 'purple' },
   ]) {
-    const expected: unknown = DEFAULT_PREFERENCES
-    assert.deepEqual(readPreferences(value), expected)
+    const expected: unknown = DEFAULT_CLOCK_SETTINGS
+    assert.deepEqual(readClockSettings(value), expected)
   }
-  assert.deepEqual(readPreferences({ timezone: 'UTC', format: '12', seconds: false, theme: 'dark' }), {
-    ...DEFAULT_PREFERENCES,
+  assert.deepEqual(readClockSettings({ timezone: 'UTC', format: '12', seconds: false, theme: 'dark' }), {
+    ...DEFAULT_CLOCK_SETTINGS,
     timezone: 'UTC',
     format: '12',
     seconds: false,
-    theme: 'dark',
   })
 }).catch((error: unknown) => { throw error })
 
-test('existing preferences migrate without resetting time controls', () => {
-  assert.deepEqual(readPreferences({ timezone: 'Asia/Tokyo', format: '12', seconds: false, theme: 'dark' }, 'zh-CN'), {
+test('current clock records retain supported time controls', () => {
+  assert.deepEqual(readClockSettings({ timezone: 'Asia/Tokyo', format: '12', seconds: false, theme: 'dark' }), {
     timezone: 'Asia/Tokyo',
     format: '12',
     seconds: false,
-    theme: 'dark',
-    locale: 'zh-CN',
-    palette: 'terracotta',
   })
-  assert.equal(readPreferences({ locale: 'unknown', palette: 'unknown' }, 'zh-CN').locale, 'zh-CN')
-  assert.equal(readPreferences({ locale: 'en', palette: 'ocean' }, 'zh-CN').palette, 'ocean')
 }).catch((error: unknown) => { throw error })
 
-test('browser language preference order and unsupported language fallback', () => {
-  assert.equal(detectLocale(['zh-TW', 'en-US']), 'zh-CN')
-  assert.equal(detectLocale(['fr-FR', 'zh-CN']), 'zh-CN')
-  assert.equal(detectLocale(['en-GB', 'zh-CN']), 'en')
-  assert.equal(detectLocale(['ja-JP']), 'en')
+test('browser language fallback survives shared negotiation with quality ordering', () => {
+  assert.equal(negotiateLocale(showcaseAcceptLanguage('zh-TW,en-US')), 'zh-CN')
+  assert.equal(negotiateLocale(showcaseAcceptLanguage('fr-FR,zh-CN')), 'zh-CN')
+  assert.equal(negotiateLocale(showcaseAcceptLanguage('en-GB,zh-CN')), 'en')
+  assert.equal(negotiateLocale(showcaseAcceptLanguage('ja-JP')), 'en')
+  assert.equal(negotiateLocale(showcaseAcceptLanguage('zh-HK;q=0.5,en;q=0.8')), 'en')
+  assert.equal(negotiateLocale(showcaseAcceptLanguage('zh-Hant;q=0,en;q=0.8')), 'en')
 }).catch((error: unknown) => { throw error })
 
 test('Chinese dates and 12-hour clipboard values follow the chosen locale', () => {

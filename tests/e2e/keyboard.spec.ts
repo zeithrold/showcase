@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { openClock } from './helpers'
+import { openClock, selectAppearance } from './helpers'
 
 test('Tab exposes skip navigation and Enter moves focus to main', async ({ page }) => {
   await page.goto('/')
@@ -58,9 +58,23 @@ test('keyboard operates clock preferences and the translated language menu', asy
   await page.keyboard.press('Space')
   await expect(page.getByRole('switch', { name: 'Seconds' })).not.toBeChecked()
   await page.keyboard.press('Tab')
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Space')
-  await expect(page.getByRole('button', { name: 'Moss', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.clock-controls').getByRole('button', { name: 'Appearance', exact: true })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('menuitemradio', { name: 'System', exact: true })).toBeFocused()
+  await page.keyboard.press('Home')
+  for (const name of [
+    'Light',
+    'Dark',
+    'Neutral',
+    'Terracotta',
+    'Moss',
+  ]) {
+    await page.keyboard.press('ArrowDown')
+    await expect(page.getByRole('menuitemradio', { name, exact: true })).toBeFocused()
+  }
+  await expect(page.getByRole('menuitemradio', { name: 'Moss', exact: true })).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'moss')
   const language = page.getByRole('combobox', { name: 'Language', exact: true })
   await language.focus()
   await page.keyboard.press('Enter')
@@ -87,6 +101,6 @@ test('an open select makes its hidden background inert and restores it on dismis
   await page.keyboard.press('Escape')
   await expect(timezone).toBeFocused()
   await expect(page.locator('[inert]')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
+  await selectAppearance(page, 'Dark')
   await expect(page.locator('html')).toHaveClass('dark')
 })

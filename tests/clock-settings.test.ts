@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { DEFAULT_CLOCK_SETTINGS, readClockSettings, TIMEZONES } from '../lib/clock-settings.ts'
 
-test('legacy combined preferences project to local clock settings only', () => {
-  const legacy = {
+test('clock settings whitelist excludes UI and private fields', () => {
+  const record = {
     timezone: 'Asia/Tokyo',
     format: '12',
     seconds: false,
@@ -13,7 +13,7 @@ test('legacy combined preferences project to local clock settings only', () => {
     account: { id: 'synthetic-account' },
     accessToken: 'synthetic-private-value',
   }
-  assert.deepEqual(readClockSettings(legacy), { timezone: 'Asia/Tokyo', format: '12', seconds: false })
+  assert.deepEqual(readClockSettings(record), { timezone: 'Asia/Tokyo', format: '12', seconds: false })
 }).catch((error: unknown) => { throw error })
 
 test('unknown and malformed clock settings retain deterministic defaults', () => {

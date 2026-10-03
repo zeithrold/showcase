@@ -1,39 +1,41 @@
 'use client'
 
 import type { JSX, ReactNode } from 'react'
+import { useFrontendPreferences } from '@ztd-me/frontend/client'
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { createClockSettingsStore } from '@/lib/clock-settings-store'
 import { PreferencesContext } from '@/lib/preferences-context'
-import { createPreferencesStore } from '@/lib/preferences-store'
 
 export function PreferencesProvider({ children }: { children: ReactNode }): JSX.Element {
   const { i18n } = useTranslation()
-  const [store] = useState(() => createPreferencesStore({
+  const frontend = useFrontendPreferences()
+  const [store] = useState(() => createClockSettingsStore({
     getItem: key => localStorage.getItem(key),
     setItem: (key, value) => localStorage.setItem(key, value),
-  }, typeof navigator === 'undefined' ? [] : navigator.languages))
-  const { preferences, ready } = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot)
-
+  }))
+  const { settings, ready } = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot)
+  const { locale, palette } = frontend.preferences
+  const theme = frontend.resolvedMode
   useEffect(() => {
-    if (!ready) {
-      return
-    }
-    document.documentElement.classList.toggle('dark', preferences.theme === 'dark')
-    document.documentElement.dataset.palette = preferences.palette
-    document.documentElement.lang = preferences.locale
-    i18n.changeLanguage(preferences.locale).catch((error: unknown) => console.error('Could not change language', error))
-    const description = i18n.getFixedT(preferences.locale)('meta.description')
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+  useEffect(() => {
+    i18n.changeLanguage(locale).catch((error: unknown) => console.error('Could not change language', error))
+    const description = i18n.getFixedT(locale)('meta.description')
     document.querySelector('meta[name="description"]')?.setAttribute('content', description)
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
-  }, [
-    preferences,
+  }, [locale, i18n])
+  const value = useMemo(() => ({
+    preferences: { ...settings, theme, locale, palette },
     ready,
-    i18n,
-  ])
-
-  const value = useMemo(() => ({ preferences, ready, update: store.update }), [
-    preferences,
+    update: store.update,
+  }), [
+    settings,
+    theme,
+    locale,
+    palette,
     ready,
     store,
   ])

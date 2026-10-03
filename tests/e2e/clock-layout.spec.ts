@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { captureClockState, openClock } from './helpers'
+import { captureClockState, openClock, selectAppearance } from './helpers'
 
 for (const width of [
   1440,
@@ -61,7 +61,7 @@ for (const width of [390, 320]) {
     await openClock(page)
     await page.getByRole('combobox', { name: 'Language', exact: true }).click()
     await page.getByRole('option', { name: '简体中文' }).click()
-    await page.getByRole('button', { name: '苔绿', exact: true }).click()
+    await selectAppearance(page, '苔绿')
     const widths = await page.evaluate(() => {
       const settings = document.querySelector('.clock-settings')
       if (settings === null) {

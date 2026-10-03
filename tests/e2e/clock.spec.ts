@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { captureClockState, openClock } from './helpers'
+import { captureClockState, openClock, selectAppearance } from './helpers'
 
 test('hydrates cleanly and animates only changed digits through minute rollover', async ({ page }) => {
   const errors: string[] = []
@@ -33,16 +33,16 @@ test('timezone, format, seconds, and theme controls work and persist', async ({ 
   await page.getByRole('switch', { name: 'Seconds' }).click()
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '11:59 PM, Shanghai')
   await expect(page.locator('.sliding-digit')).toHaveCount(4)
-  await page.getByRole('button', { name: 'Switch to dark theme' }).click()
+  await selectAppearance(page, 'Dark')
   await expect(page.locator('html')).toHaveClass('dark')
-  const saved = await page.evaluate((): unknown => JSON.parse(localStorage.getItem('showcase.clock.v1') ?? '{}'))
+  const saved = await page.evaluate((): unknown => {
+    return JSON.parse(localStorage.getItem('showcase.clock.settings.v1') ?? '{}')
+  })
   expect(saved).toEqual({
+    version: 1,
     timezone: 'Asia/Shanghai',
     format: '12',
     seconds: false,
-    theme: 'dark',
-    locale: 'en',
-    palette: 'terracotta',
   })
   await page.reload()
   await expect(page.locator('html')).toHaveClass('dark')
@@ -66,6 +66,10 @@ test('fullscreen keeps timezone controls usable and exits correctly', async ({ p
   await openClock(page)
   await page.getByRole('button', { name: 'Enter fullscreen' }).click()
   await expect(page.locator('#clock')).toHaveAttribute('data-focused', 'true')
+  await page.locator('#clock').getByRole('button', { name: 'Appearance', exact: true }).click()
+  await expect(page.locator('#clock').getByRole('menu')).toBeVisible()
+  await page.getByRole('menuitemradio', { name: 'Dark', exact: true }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-mode', 'dark')
   await page.getByRole('combobox', { name: 'Timezone' }).click()
   await page.getByRole('option', { name: 'Tokyo', exact: true }).click()
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '00:59:58, Tokyo')
@@ -114,7 +118,7 @@ test('language switch translates dates, controls, accessible labels, and persist
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
   await openClock(page)
   await expect(page).toHaveTitle('zeithrold/showcase')
-  await expect(page.locator('.brand')).toHaveText('zeithrold/showcase')
+  await expect(page.locator('.ztd-brand')).toHaveText('zeithrold/showcase')
   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
   await page.getByRole('option', { name: '简体中文' }).click()
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
@@ -137,9 +141,10 @@ test('language switch translates dates, controls, accessible labels, and persist
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '03:59:58 PM, UTC')
 })
 
-test('all five palettes change the page and clock in both light and dark modes', async ({ page }) => {
+test('all six palettes change the page and clock in both light and dark modes', async ({ page }) => {
   await openClock(page)
   const palettes = [
+    'Neutral',
     'Terracotta',
     'Moss',
     'Ocean',
@@ -150,11 +155,11 @@ test('all five palettes change the page and clock in both light and dark modes',
     const backgrounds = new Set<string>()
     const secondsColors = new Set<string>()
     if (mode === 'dark') {
-      await page.getByRole('button', { name: 'Switch to dark theme' }).click()
+      await selectAppearance(page, 'Dark')
     }
     for (const name of palettes) {
-      await page.getByRole('button', { name, exact: true }).click()
-      await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute('aria-pressed', 'true')
+      await selectAppearance(page, name)
+      await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', name.toLowerCase())
       const styles = await page.evaluate(() => {
         const seconds = document.querySelector('.seconds-pair')
         if (seconds === null) {
@@ -168,12 +173,12 @@ test('all five palettes change the page and clock in both light and dark modes',
       backgrounds.add(styles.background)
       secondsColors.add(styles.seconds)
     }
-    expect(backgrounds.size).toBe(5)
-    expect(secondsColors.size).toBe(5)
+    expect(backgrounds.size).toBe(6)
+    expect(secondsColors.size).toBe(6)
   }
-  await page.getByRole('button', { name: 'Ocean', exact: true }).click()
+  await selectAppearance(page, 'Ocean')
   await page.reload()
-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
   await expect(page.locator('html')).toHaveClass('dark')
   await captureClockState(page, test.info(), 'ocean-dark')
 })

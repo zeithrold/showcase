@@ -1,5 +1,21 @@
 import { expect, test } from '@playwright/test'
 import { captureState } from '@ztd-me/frontend-checks/playwright'
+import { selectAppearance } from './helpers'
+import { changeLocale, setSharedCookie } from './shared-fixtures'
+
+test('shared footer keeps the copyright and project destinations in both locales', async ({ page }) => {
+  await page.goto('/')
+  for (const locale of ['en', 'zh-CN'] as const) {
+    if (locale === 'zh-CN') {
+      await changeLocale(page, locale)
+    }
+    const footer = page.getByRole('contentinfo')
+    await expect(footer).toContainText('© Zeithrold')
+    await expect(footer.getByRole('link')).toHaveCount(2)
+    await expect(footer.getByRole('link', { name: 'hello@ztd.me' })).toHaveAttribute('href', 'mailto:hello@ztd.me')
+    await expect(footer.locator('a[href="https://github.com/zeithrold/showcase"]')).toHaveText('GitHub')
+  }
+})
 
 test('homepage lists real pages and opens the clock as a separate route', async ({ page }) => {
   const errors: string[] = []
@@ -39,12 +55,12 @@ test('language, palette, theme and clock settings survive navigation and reload'
   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
   await page.getByRole('option', { name: '简体中文' }).click()
   await expect(page.getByRole('heading', { name: '页面目录', exact: true })).toBeVisible()
-  await page.getByRole('button', { name: '海蓝', exact: true }).click()
-  await page.getByRole('button', { name: '切换到深色模式', exact: true }).click()
+  await selectAppearance(page, '海蓝')
+  await selectAppearance(page, '深色')
   await page.getByRole('link', { name: '时钟', exact: true }).click()
   await expect(page).toHaveURL(/\/clock$/)
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'ocean')
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
   await expect(page.locator('html')).toHaveClass('dark')
   await page.getByRole('combobox', { name: '时区', exact: true }).click()
   await page.getByRole('option', { name: '东京', exact: true }).click()
@@ -54,7 +70,7 @@ test('language, palette, theme and clock settings survive navigation and reload'
   await expect(page.getByRole('heading', { name: '页面目录', exact: true })).toBeVisible()
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
-  await expect(page.getByRole('button', { name: '海蓝', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
   await expect(page.locator('html')).toHaveClass('dark')
   await page.getByRole('link', { name: '时钟', exact: true }).click()
   await expect(page.getByRole('combobox', { name: '时区', exact: true })).toHaveText('东京')
@@ -70,12 +86,10 @@ for (const width of [
   390,
   320,
 ]) {
-  for (const language of ['en', 'zh-CN']) {
-    test(`directory fits ${width}px in ${language}`, async ({ page }) => {
+  for (const language of ['en', 'zh-CN'] as const) {
+    test(`directory fits ${width}px in ${language}`, async ({ page, context }) => {
       await page.setViewportSize({ width, height: 900 })
-      await page.addInitScript((locale) => {
-        localStorage.setItem('showcase.clock.v1', JSON.stringify({ locale }))
-      }, language)
+      await setSharedCookie(context, { version: 1, mode: 'system', palette: 'neutral', locale: language })
       await page.goto('/')
       await expect(page.locator('html')).toHaveAttribute('lang', language)
       const widths = await page.evaluate(() => ({

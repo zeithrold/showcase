@@ -1,17 +1,12 @@
+import type { FrontendPreferences } from '@ztd-me/frontend'
 import type { ClockFormat, ClockSettings, Timezone } from './clock-settings.ts'
 import type { Locale } from './i18n.ts'
-import type { Palette } from './palettes.ts'
-import { DEFAULT_CLOCK_SETTINGS, readClockSettings } from './clock-settings.ts'
-import { isLocale } from './i18n.ts'
-import { PALETTES } from './palettes.ts'
 
 export type { ClockFormat, ClockSettings, Timezone } from './clock-settings.ts'
 export { DEFAULT_CLOCK_SETTINGS, isTimezone, readClockSettings, TIMEZONES } from './clock-settings.ts'
 
-export interface ClockPreferences extends ClockSettings {
+export interface ClockPreferences extends ClockSettings, Pick<FrontendPreferences, 'locale' | 'palette'> {
   theme: 'light' | 'dark'
-  locale: Locale
-  palette: Palette
 }
 export interface ClockParts {
   hour: string
@@ -23,31 +18,6 @@ export interface ClockParts {
   dateLabel: string
   offset: string
 }
-export const DEFAULT_PREFERENCES: ClockPreferences = {
-  ...DEFAULT_CLOCK_SETTINGS,
-  theme: 'light',
-  locale: 'en',
-  palette: 'terracotta',
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
-function isPalette(value: unknown): value is Palette {
-  return PALETTES.some(palette => palette.id === value)
-}
-
-export function readPreferences(value: unknown, fallbackLocale: Locale = 'en'): ClockPreferences {
-  const source = isRecord(value) ? value : {}
-  return {
-    ...readClockSettings(source),
-    theme: source.theme === 'dark' ? 'dark' : 'light',
-    locale: isLocale(source.locale) ? source.locale : fallbackLocale,
-    palette: isPalette(source.palette) ? source.palette : 'terracotta',
-  }
-}
-
 export function resolveTimezone(timezone: Timezone): string {
   return timezone === 'local' ? new Intl.DateTimeFormat().resolvedOptions().timeZone : timezone
 }
