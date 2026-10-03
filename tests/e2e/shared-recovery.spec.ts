@@ -73,10 +73,16 @@ test('@a11y denied persistence feedback and shared menus remain accessible', asy
   await assertAccessible(page, info, { label: 'denied-storage-page' })
   await page.getByRole('banner').getByRole('button', { name: '外观', exact: true }).click()
   await expect(page.getByRole('menu')).toBeVisible()
+  await page.getByRole('menu').evaluate(async (element) => {
+    await Promise.all(element.getAnimations({ subtree: true }).map(async animation => await animation.finished))
+  })
   await assertAccessible(page, info, { label: 'denied-storage-appearance' })
   await captureState(page, info, 'denied-storage-appearance')
   await page.keyboard.press('Escape')
   await page.getByRole('combobox', { name: '语言', exact: true }).click()
   await expect(page.getByRole('listbox')).toBeVisible()
+  await page.getByRole('listbox').evaluate(async (element) => {
+    await Promise.all(element.getAnimations({ subtree: true }).map(async animation => await animation.finished))
+  })
   await assertAccessible(page, info, { label: 'denied-storage-locale' })
 })
