@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "target": "ES2023",
+    "jsx": "react-jsx",
+    "rewriteRelativeImportExtensions": true,
+    "rootDir": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": false,
+    "outDir": ".zt/unit"
+  },
+  "include": ["tests/*.test.ts"],
+  "exclude": ["node_modules", ".zt"]
+}

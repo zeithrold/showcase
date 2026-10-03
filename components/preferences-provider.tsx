@@ -1,12 +1,12 @@
 'use client'
 
 import type { JSX, ReactNode } from 'react'
-import { useFrontendPreferences } from '@ztd-me/frontend/client'
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { createClockSettingsStore } from '@/lib/clock-settings-store'
 import { PreferencesContext } from '@/lib/preferences-context'
+import { useFrontendPreferences } from './ui/ztd-me/client.ts'
 
 export function PreferencesProvider({ children }: { children: ReactNode }): JSX.Element {
   const { i18n } = useTranslation()

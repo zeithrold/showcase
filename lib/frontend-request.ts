@@ -1,7 +1,7 @@
-import type { FrontendPreferences, PreferencePolicy } from '@ztd-me/frontend'
+import type { FrontendPreferences, PreferencePolicy } from '../components/ui/ztd-me/index.ts'
 import process from 'node:process'
-import { resolveInitialPreferences } from '@ztd-me/frontend'
 import { headers } from 'next/headers'
+import { resolveInitialPreferences } from '../components/ui/ztd-me/index.ts'
 import { showcaseAcceptLanguage } from './frontend-locale'
 import { showcasePreferencePolicy } from './frontend-policy'
 

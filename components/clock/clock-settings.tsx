@@ -1,7 +1,7 @@
 'use client'
 
 import type { JSX } from 'react'
-import { Globe2 } from 'lucide-react'
+import { ArrowUp, Globe2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { PalettePicker } from '@/components/palette-picker'
 import { Button } from '@/components/ui/button'
@@ -65,7 +65,7 @@ export function ClockSettings({ container }: { container?: HTMLElement | null })
           <Switch id="show-seconds" checked={preferences.seconds} onCheckedChange={seconds => update({ seconds })} />
         </div>
         <span className="settings-note">
-          <span className="motion-icon" aria-hidden="true">↥</span>
+          <ArrowUp className="motion-icon" size={15} aria-hidden="true" />
           {' '}
           {t('settings.motion')}
         </span>

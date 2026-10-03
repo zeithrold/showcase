@@ -11,6 +11,7 @@ const root = fileURLToPath(new URL('../', import.meta.url))
 const cli = fileURLToPath(import.meta.resolve('@playwright/test/cli'))
 const playwright = import.meta.resolve('@playwright/test')
 const helpers = import.meta.resolve('@ztd-me/frontend-checks/playwright')
+const browserTest = fileURLToPath(new URL('../tests/browser-test.ts', import.meta.url))
 
 async function createFixture(directory) {
   const config = path.join(directory, 'playwright.config.mjs')
@@ -29,7 +30,7 @@ export default defineConfig({
 })
 `)
   await writeFile(path.join(directory, 'failure.spec.mjs'), `
-import { test } from ${JSON.stringify(playwright)}
+import { test } from ${JSON.stringify(browserTest)}
 import { assertAccessible, captureState } from ${JSON.stringify(helpers)}
 test('intentional evidence probe', async ({ page }, testInfo) => {
   await page.goto('/clock')

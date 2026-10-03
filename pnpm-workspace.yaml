@@ -15,6 +15,9 @@ overrides:
   # Keep vinext's optional OG renderer on the patched ZIP decoder.
   fflate@>=0.7.0 <0.7.5: 0.7.5
 
+patchedDependencies:
+  '@radix-ui/react-select@2.3.7': components/ui/ztd-me/patches/@radix-ui__react-select@2.3.7.patch
+
 allowBuilds:
   esbuild: true
   workerd: true

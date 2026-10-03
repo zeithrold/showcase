@@ -1,5 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { captureState } from '@ztd-me/frontend-checks/playwright'
+import { test } from '../browser-test'
 import { selectAppearance, watchErrors } from './helpers'
 import { changeLocale, COOKIE_NAME, setSharedCookie } from './shared-fixtures'
 import { auditPreferenceStorage, preferenceStorageAudit } from './storage-audit'

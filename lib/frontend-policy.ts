@@ -1,5 +1,5 @@
-import type { PreferencePolicy } from '@ztd-me/frontend'
-import { createPreferencePolicy } from '@ztd-me/frontend'
+import type { PreferencePolicy } from '../components/ui/ztd-me/index.ts'
+import { createPreferencePolicy } from '../components/ui/ztd-me/index.ts'
 
 const COOKIE_NAMES = {
   production: 'ztd.frontend.v1',

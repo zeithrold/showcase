@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { readPreferenceCookie } from '@ztd-me/frontend'
+import { readPreferenceCookie } from '../components/ui/ztd-me/index.ts'
 import { showcasePreferencePolicy } from '../lib/frontend-policy.ts'
 
 test('production keeps the current shared cookie and notification key with explicit secure domain', () => {

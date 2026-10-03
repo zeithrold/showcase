@@ -1,5 +1,7 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { captureState } from '@ztd-me/frontend-checks/playwright'
+import { test } from '../browser-test'
+import { prepareFontPreview } from '../font-preview'
 import { selectAppearance, watchErrors } from './helpers'
 import { COOKIE_NAME, setSharedCookie } from './shared-fixtures'
 
@@ -19,6 +21,7 @@ test('cookie snapshots vary SSR content and remain uncached per request', async 
 
 test('system dark and Chinese content render before JavaScript runs', async ({ browser }, info) => {
   const context = await browser.newContext({ javaScriptEnabled: false, colorScheme: 'dark', locale: 'zh-CN' })
+  await prepareFontPreview(context)
   const page = await context.newPage()
   await page.goto(info.project.use.baseURL ?? 'http://localhost:4173')
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')

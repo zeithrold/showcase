@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { negotiateLocale } from '@ztd-me/frontend'
+import { negotiateLocale } from '../components/ui/ztd-me/index.ts'
 import { DEFAULT_CLOCK_SETTINGS, formatClock, getClockParts, readClockSettings } from '../lib/clock.ts'
 import { showcaseAcceptLanguage } from '../lib/frontend-locale.ts'
 

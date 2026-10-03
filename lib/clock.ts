@@ -1,4 +1,4 @@
-import type { FrontendPreferences } from '@ztd-me/frontend'
+import type { FrontendPreferences } from '../components/ui/ztd-me/index.ts'
 import type { ClockFormat, ClockSettings, Timezone } from './clock-settings.ts'
 import type { Locale } from './i18n.ts'
 

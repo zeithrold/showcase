@@ -1,5 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { captureState } from '@ztd-me/frontend-checks/playwright'
+import { test } from '../browser-test'
 import { selectAppearance, watchErrors } from '../e2e/helpers'
 import { changeLocale } from '../e2e/shared-fixtures'
 import { expectSharedState, interceptWorkerOrigins, PREVIEW_ORIGIN, SHOWCASE_ORIGIN } from './worker-origins'
