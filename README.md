@@ -2,7 +2,7 @@
 
 A personal collection of interfaces and useful tools by Zeithrold, at [showcase.ztd.me](https://showcase.ztd.me).
 
-Built with vinext App Router, React, Tailwind CSS, and Shadcn UI. Runs on a single Cloudflare Worker with its built-in static assets. No database, KV, R2, image service, or other addons. Fonts are served locally.
+Built with vinext App Router, React, Tailwind CSS, and Shadcn UI. Runs on a single Cloudflare Worker with its built-in static assets. No database, KV, R2, image service, or other addons. Noto fonts use the direct Google Fonts API.
 
 ## Develop and deploy
 
@@ -30,8 +30,8 @@ zt sync --root .
 pnpm check
 ```
 
-`zt.json` maps the frontend profile to native lint, CSS, typecheck, unit, build, browser regression and accessibility commands. `pnpm check` runs that profile once without recursion or repeated browser cases. Chromium must be installed first. Regression tests and Axe scans use separate artifact subdirectories; `pnpm test:e2e` runs both suites together when requested. `zt` retains command logs and its structured report under `.zt/artifacts/<run>/`, together with CSS results, full Axe JSON, HTML/JSON browser reports, named state captures and failure traces/screenshots/videos. `pnpm test:evidence` deliberately
-fails an isolated unnamed-button fixture and verifies retained evidence and stopped later gates. CI uploads this directory even when verification fails.
+`zt.json` maps the frontend profile to required native lint, CSS, typecheck, unit, build, browser regression, accessibility/fonts and failure-evidence integration commands. `pnpm check` runs that profile once without recursion or repeated browser cases. Chromium must be installed first. Regression tests and Axe scans use separate artifact subdirectories; `pnpm test:e2e` runs both suites together when requested. `zt` retains command logs and its structured report under `.zt/artifacts/<run>/`, together with CSS results, full Axe JSON, HTML/JSON browser reports, named state captures and failure traces/screenshots/videos. The required integration gate runs `pnpm test:evidence`, which deliberately
+fails an isolated unnamed-button fixture and verifies retained evidence and stopped later gates. It can also run independently after a build. CI uploads this directory even when verification fails.
 
 The five managed Skills directories and `zt.lock.json` come from the same reviewed tools commit. Preview sync before applying it; the CLI refuses to overwrite unmanaged files or local edits. See [DESIGN.md](DESIGN.md) for this application's design and verification contract.
 
@@ -47,11 +47,15 @@ SHOWCASE_TEST_URL=https://showcase.ztd.me pnpm test:e2e
 
 ## GitHub Actions
 
-[`CI & Deploy`](.github/workflows/deploy.yml) runs on pushes to `main` and pull requests targeting `main`. Its **Verify** job lints with zero warnings, checks TypeScript, runs unit tests, builds the Worker, and runs the full browser suite against that production Worker locally. It uploads the verified `dist/` artifact named for the workflow commit. PRs only verify; the verification job has no Cloudflare credentials.
+[`CI & Deploy`](.github/workflows/deploy.yml) runs on pushes to `main` and pull requests targeting `main`. Its **Verify** job uses the shared checkout, pnpm, Node, frozen dependency install, Go 1.27.1 and pinned zt setup order. Immutable action pins match the shared convention. A separate provenance step retains the checked-out revision, lock digest and CLI/toolchain/Node/pnpm versions. Chromium setup precedes `pnpm check`, which runs every required native gate, including the failure-evidence probe. Failed native logs are shown before artifact upload. Showcase also keeps its independent real Google Fonts diagnostic when a required native prerequisite fails; it does not clear that failure.
 
-After a successful main push verification, **Deploy** automatically downloads that same run's artifact, checks out the same commit, and deploys it without rebuilding, tagged with the Git SHA. Cloudflare's authenticated API through Wrangler then verifies that this exact commit serves 100% of traffic. There is no manual dispatch, confirmation, enable switch, or expected-SHA input. Stale PR checks are canceled; an active main run is never interrupted, and the latest pending main run waits for it to finish. Browser evidence and verified builds are retained for seven days.
+See [the pipeline contract](docs/ci-pipeline.md) for the common sequence and Showcase's project-specific checks.
 
-Cloudflare challenges block GitHub-hosted requests to the public site. The CI browser suite runs against the production Worker locally; post-deployment verification checks the active version through Cloudflare's API. From a network accepted by Cloudflare, `pnpm verify:deployment` verifies both public pages and all public bundles, manifests, stylesheets, fonts and icons by SHA-256 against the corresponding `dist/client` build. Public browser tests can also be run with the command above.
+Verification lints with zero warnings, checks TypeScript, runs unit tests, builds the Worker, and runs the full browser suite against that production Worker locally. It uploads the verified `dist/` artifact named for the workflow commit. PRs only verify; the verification job has no Cloudflare credentials.
+
+After a successful main push verification, **Deploy** automatically downloads that same run's artifact and checks out the same commit. Its boundary step checks the main-push/repository identity and built Worker/client files before deploying without rebuilding, tagged with the Git SHA. Cloudflare's authenticated API through Wrangler verifies that this exact commit serves 100% of traffic; `pnpm verify:deployment` then checks the live pages and every public asset against the downloaded build. There is no manual dispatch, confirmation, enable switch, or expected-SHA input. Stale PR checks are canceled; an active main run is never interrupted, and the latest pending main run waits for it to finish. Browser evidence and verified builds are retained for seven days.
+
+Cloudflare has previously challenged GitHub-hosted public requests. The CI browser suite still runs against the production Worker locally. The required post-deployment public check rejects challenges, unexpected redirects, missing page content and any asset SHA-256 mismatch against the corresponding `dist/client` build; it has no credential fallback or security-rule bypass. It verifies both public pages and all public bundles, manifests, stylesheets, fonts and icons. Public browser tests can also be run with the command above.
 
 Deployment reuses the existing `CLOUDFLARE_API_TOKEN` repository secret. The account ID, `showcase` Worker, and `showcase.ztd.me` Custom Domain stay in `wrangler.jsonc`; no additional repository variables are required. Credentials and permissions are not changed by the workflow. The token is exposed only to deployment and release verification steps. Missing credentials or permission errors stop deployment without a credential fallback. Local interactive Wrangler authentication is separate from the CI credential.
 

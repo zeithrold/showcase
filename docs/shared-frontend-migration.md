@@ -76,7 +76,6 @@ Use Node 24, pnpm 11.22.0, Playwright 1.62.0 Chromium and the existing pinned zt
 ```sh
 pnpm install --frozen-lockfile
 pnpm check
-pnpm test:evidence
 ```
 
 The recipe's Select 2.3.7 patch changes only its `.d.ts` and `.d.mts` Popper inheritance; no JavaScript
@@ -90,7 +89,8 @@ CSS checks include all installed CSS and exactly the three runtime variables sup
 Popper/Select, following the source recipe. Typed/framework lint and limits remain strict.
 
 The required native profile covers lint, CSS, types, units, production Worker build, browser/storage
-regressions and Axe. Menu focus/motion tests cover the approved chrome, ordinary pages retain all
+regressions, Axe and the failure-evidence integration probe. Menu focus/motion tests cover the approved
+chrome, ordinary pages retain all
 existing flows, and fonts add actual platform-glyph, weight, composed-emoji, CSP and request evidence.
 English cold responses must total at most 500,000 bytes, Chinese cold 1,000,000 bytes, and immediate
 warm reloads 10,000 bytes, including API CSS and font responses. Fresh contexts isolate cold runs;
