@@ -35,7 +35,8 @@ Clock captures fix the displayed date while browser timers and animation frames 
 paused test clocks do not produce unpainted digit images. Popup scans await native animations.
 An isolated deliberate unnamed-button failure verifies complete Axe JSON, state and failure
 screenshots, HTML/JSON reports, video, trace, nonzero gate status and later `not_run` status.
-`pnpm test:evidence` runs this probe locally and in CI; its expected failure is validated rather
+The required final native integration gate runs `pnpm test:evidence` locally and in CI;
+its expected failure is validated rather
 than applied to the application suite. CI uploads those artifacts on failures and retains the
 verified Worker for main-only deployment.
 

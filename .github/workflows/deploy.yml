@@ -37,27 +37,38 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Setup pinned Go toolchain
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+      - name: Setup Go for verification
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
           go-version: 1.27.1
           cache: false
       - name: Install reviewed zt CLI
+        env:
+          GOBIN: ${{ runner.temp }}/zt-bin
         run: |
           go install github.com/zeithrold/tools/cmd/zt@3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f
-          zt version
-          go version -m "$(command -v zt)"
+          printf '%s\n' "$GOBIN" >> "$GITHUB_PATH"
+      - name: Record verification provenance
+        run: |
+          mkdir -p .zt/artifacts
+          zt version > .zt/artifacts/zt-version.txt
+          go version -m "$(command -v zt)" > .zt/artifacts/zt-toolchain.txt
+          git rev-parse HEAD > .zt/artifacts/revision.txt
+          sha256sum pnpm-lock.yaml > .zt/artifacts/lockfile.sha256
+          node --version > .zt/artifacts/node-version.txt
+          pnpm --version > .zt/artifacts/pnpm-version.txt
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
-      - name: Verify frontend and production Worker locally
+      - name: Verify frontend and production Worker
         run: pnpm check
+      - name: Show failed native checks
+        if: failure()
+        run: node scripts/show-check-failures.mjs
       - name: Verify real Google Fonts independently after a blocked native gate
         if: failure()
         env:
           ZT_ARTIFACTS_DIR: .zt/artifacts/independent-google-fonts
         run: pnpm build && pnpm test:fonts
-      - name: Verify failure evidence retention
-        run: pnpm test:evidence
       - name: Upload verified build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -105,7 +116,15 @@ jobs:
         with:
           name: worker-${{ github.sha }}
           path: dist/
-      - name: Deploy the tested Worker and built-in assets
+      - name: Verify deployment boundaries
+        run: |
+          test "$GITHUB_EVENT_NAME" = push
+          test "$GITHUB_REF" = refs/heads/main
+          test "$GITHUB_REPOSITORY" = zeithrold/showcase
+          test -f dist/server/wrangler.json
+          test -f dist/server/index.js
+          test -d dist/client
+      - name: Deploy the tested Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -114,7 +133,9 @@ jobs:
             exit 1
           fi
           pnpm exec wrangler deploy --config dist/server/wrangler.json --tag "$GITHUB_SHA"
-      - name: Verify active Worker version
+      - name: Verify production deployment
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: pnpm verify:release
+        run: |
+          pnpm verify:release
+          pnpm verify:deployment
