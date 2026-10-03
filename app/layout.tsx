@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import type { JSX, ReactNode } from 'react'
-import { frontendRootAttributes } from '@ztd-me/frontend'
 import { FrontendAdapter } from '@/components/frontend-adapter'
 import { frontendRequestState } from '@/lib/frontend-request'
 import { resources } from '@/lib/i18n'
-import '@ztd-me/frontend/styles.css'
+import { frontendRootAttributes } from '../components/ui/ztd-me/index.ts'
+import '../components/ui/ztd-me/styles.css'
 import './globals.css'
 
 export async function generateMetadata(): Promise<Metadata> {

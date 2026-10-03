@@ -2,7 +2,7 @@
 
 import type { JSX } from 'react'
 
-import { ArrowDown, ArrowRight } from 'lucide-react'
+import { ArrowDown, ArrowRight, Asterisk } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { PalettePicker } from '@/components/palette-picker'
@@ -64,7 +64,7 @@ export function PageDirectory(): JSX.Element {
       <section className="intro" aria-labelledby="intro-heading">
         <div>
           <p className="eyebrow intro-eyebrow">
-            <span className="tiny-cross">✳</span>
+            <Asterisk className="tiny-cross" size={24} aria-hidden="true" />
             {' '}
             {t('intro.eyebrow')}
           </p>

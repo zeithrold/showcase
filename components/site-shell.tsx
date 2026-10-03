@@ -1,12 +1,12 @@
 'use client'
 
-import type { LinkProps } from '@ztd-me/frontend'
 import type { JSX, ReactNode } from 'react'
-import { PublicShell, useFrontendPreferences } from '@ztd-me/frontend/client'
+import type { LinkProps } from './ui/ztd-me/index.ts'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { ShowcaseMark } from '@/components/showcase-mark'
 import { ProjectActions } from '@/components/site-header'
+import { PublicShell, useFrontendPreferences } from './ui/ztd-me/client.ts'
 
 export { IconButton } from '@/components/icon-button'
 

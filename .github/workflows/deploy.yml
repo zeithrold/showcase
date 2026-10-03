@@ -51,6 +51,11 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Verify frontend and production Worker locally
         run: pnpm check
+      - name: Verify real Google Fonts independently after a blocked native gate
+        if: failure()
+        env:
+          ZT_ARTIFACTS_DIR: .zt/artifacts/independent-google-fonts
+        run: pnpm build && pnpm test:fonts
       - name: Verify failure evidence retention
         run: pnpm test:evidence
       - name: Upload verified build

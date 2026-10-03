@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '../browser-test'
 import { openClock, selectAppearance } from './helpers'
 
 test('Tab exposes skip navigation and Enter moves focus to main', async ({ page }) => {

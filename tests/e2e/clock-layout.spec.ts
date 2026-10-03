@@ -1,4 +1,6 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '../browser-test'
+import { prepareFontPreview } from '../font-preview'
 import { captureClockState, openClock, selectAppearance } from './helpers'
 
 for (const width of [
@@ -82,6 +84,7 @@ for (const width of [390, 320]) {
 
 test('fresh Chinese visitors use their browser language without a hydration mismatch', async ({ browser }) => {
   const context = await browser.newContext({ locale: 'zh-CN', timezoneId: 'Asia/Shanghai' })
+  await prepareFontPreview(context)
   const page = await context.newPage()
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))

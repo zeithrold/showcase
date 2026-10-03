@@ -1,8 +1,8 @@
 'use client'
 
 import type { JSX } from 'react'
-import { AppearanceMenu, useFrontendPreferences } from '@ztd-me/frontend/client'
 import { useTranslation } from 'react-i18next'
+import { AppearanceMenu, useFrontendPreferences } from './ui/ztd-me/client.ts'
 
 export function PalettePicker(): JSX.Element {
   const { t } = useTranslation()

@@ -1,5 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { FrontendPreferences } from '@ztd-me/frontend'
+import type { FrontendPreferences } from '../../components/ui/ztd-me/index.ts'
 
 export const COOKIE_NAME = 'ztd.frontend.development.showcase.v1'
 export const SHARED_PREFERENCES: FrontendPreferences = { version: 1, mode: 'dark', palette: 'ocean', locale: 'zh-CN' }

@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '../browser-test'
 import { captureClockState, openClock, selectAppearance } from './helpers'
 
 test('hydrates cleanly and animates only changed digits through minute rollover', async ({ page }) => {

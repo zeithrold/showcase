@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '../browser-test'
 import { captureClockState, openClock, selectAppearance, watchErrors } from './helpers'
 
 test('header navigation stays within the current showcase routes', async ({ page }) => {

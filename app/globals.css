@@ -13,14 +13,6 @@
   }
 }
 
-@font-face {
-  font-family: "DM Sans Variable";
-  font-style: normal;
-  font-weight: 100 1000;
-  font-display: swap;
-  src: url("@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2") format("woff2");
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -44,7 +36,7 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 20px;
-  --font-sans: "Inter Variable", sans-serif;
+  --font-sans: var(--ztd-font-sans);
 }
 
 :root {
@@ -64,7 +56,7 @@
   --clock-shadow: #25231d03;
   --control-shadow: #0000000c;
 
-  font-family: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--ztd-font-sans);
   background: var(--background);
   color: var(--foreground);
   font-synthesis: none;
@@ -264,7 +256,7 @@ h1 > span {
 
 h1 {
   margin: 0;
-  font-family: "DM Sans Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-size: 60px;
   font-weight: 500;
   letter-spacing: -2.7px;
@@ -396,10 +388,10 @@ h1 {
   gap: 2px;
   padding: 24px 0;
   color: var(--clock-color);
-  font-family: "DM Sans Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-variant-numeric: tabular-nums;
   font-size: 53px;
-  font-weight: 450;
+  font-weight: 400;
   line-height: 1.15;
   letter-spacing: -1px;
 }
@@ -446,7 +438,7 @@ h1 {
 
 .page-entry-content h3 {
   margin: 14px 0 10px;
-  font-family: "DM Sans Variable", "Inter Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-size: 30px;
   font-weight: 500;
   letter-spacing: -1px;
@@ -581,7 +573,7 @@ h1 {
 }
 
 html:lang(zh-CN) h1 {
-  font-family: "Inter Variable", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-size: 54px;
   line-height: 1.3;
   letter-spacing: -1.5px;
@@ -660,9 +652,9 @@ html:lang(zh-CN) .tool-intro h1 {
   width: fit-content;
   max-width: 100%;
   margin: 17px auto 9px;
-  font-family: "DM Sans Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-size: clamp(92px, 11.8vw, 164px);
-  font-weight: 450;
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
   color: var(--clock-color);
   letter-spacing: 0;
@@ -979,7 +971,7 @@ html:lang(zh-CN) .tool-intro h1 {
 
 .world-time {
   font-size: 14px;
-  font-family: "DM Sans Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-variant-numeric: tabular-nums;
   letter-spacing: -.2px;
 }
@@ -1026,7 +1018,7 @@ html:lang(zh-CN) .tool-intro h1 {
 }
 
 .note h3 {
-  font-family: "DM Sans Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-size: 19px;
   font-weight: 500;
   letter-spacing: -.4px;
@@ -1048,7 +1040,7 @@ html:lang(zh-CN) .tool-intro h1 {
 }
 
 .about-dialog [data-slot="dialog-title"] {
-  font-family: "DM Sans Variable", sans-serif;
+  font-family: var(--ztd-font-sans);
   font-size: 30px;
   letter-spacing: -1px;
   margin-top: 14px;
@@ -1439,7 +1431,7 @@ html:lang(zh-CN) .eyebrow, html:lang(zh-CN) .live-label, html:lang(zh-CN) .colle
 
   .clock-digits {
     font-size: 15.8vw;
-    font-weight: 460;
+    font-weight: 400;
     margin: 20px auto 12px;
   }
 

@@ -10,3 +10,5 @@ next-env.d.ts
 /playwright-report/
 /.zt/artifacts/
 /.zt/browser/
+/.zt/unit/
+/.zt/font-preview/

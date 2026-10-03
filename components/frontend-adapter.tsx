@@ -1,11 +1,11 @@
 'use client'
 
-import type { FrontendPreferences, PreferencePolicy } from '@ztd-me/frontend'
 import type { JSX, ReactNode } from 'react'
-import { FrontendProvider } from '@ztd-me/frontend/client'
+import type { FrontendPreferences, PreferencePolicy } from './ui/ztd-me/index.ts'
 import { useSyncExternalStore } from 'react'
 import { ShowcaseI18nProvider } from '@/components/i18n-provider'
 import { PreferencesProvider } from '@/components/preferences-provider'
+import { FrontendProvider } from './ui/ztd-me/client.ts'
 
 function subscribeFullscreen(listener: () => void): () => void {
   document.addEventListener('fullscreenchange', listener)
