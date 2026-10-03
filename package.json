@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.tooling.json",
     "test": "tsc -p tsconfig.unit.json && node --test .zt/unit/tests/*.test.js",
     "test:e2e": "playwright test",
-    "verify:deployment": "node scripts/verify-deployment.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "lint": "eslint . --max-warnings 0",
     "check": "zt check --module web --profile frontend --root .",

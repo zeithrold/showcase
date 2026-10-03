@@ -66,11 +66,11 @@ deployment`. The boundary step checks the trigger/repository and required Worker
 Deployment uses that run's downloaded artifact without rebuilding and tags it with the workflow SHA.
 The existing account, Worker, Custom Domain, token scope and repository-only deployment guard remain local.
 
-Post-deployment verification first runs `pnpm verify:release` through the existing authenticated
-Wrangler API, requiring the exact SHA at 100% traffic. It then runs `pnpm verify:deployment`, which
-fetches live HTML and compares every public asset by SHA256 with the downloaded build. This public
-comparison belongs after deployment; it is not a pre-deploy build check. Challenges, redirects,
-missing page content or mismatched assets fail the check without a security-rule bypass.
+Post-deployment verification runs `pnpm verify:release` through the existing authenticated
+Wrangler API, requiring a single active Worker version tagged with the exact SHA at 100% traffic.
+The owner removed the public page and asset probes from GitHub Actions because Cloudflare
+challenges those requests. Browser, accessibility and real Google Fonts checks remain required
+against the production Worker locally before deployment.
 
 The existing token is available only to deployment and production verification. Permissions,
 secrets, infrastructure, main-run concurrency and production security settings are unchanged.
