@@ -1,7 +1,6 @@
 import config from '@ztd-me/eslint'
 
 export default config({
-  rules: { 'ts/consistent-type-definitions': ['error', 'type'] },
   react: { framework: 'vinext' },
   typescript: { tsconfigPath: 'tsconfig.lint.json' },
   ignores: [

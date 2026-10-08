@@ -10,6 +10,11 @@ Use an approved full source SHA and verify a fresh public install after upstream
 migrations. The owner reviews upstream changes; consumers review their own source adaptations.
 No automatic updater or production migration is included.
 
+First-party source and documentation are MIT licensed (`meta.license: MIT`). Keep the delivered
+`LICENSE` and `THIRD_PARTY_NOTICES.md` with copied source and adaptations. shadcn and the Radix patch
+retain their original MIT notices in `third-party/`; Noto fonts retain OFL-1.1. Installed dependencies
+keep their upstream licenses. An MIT item license does not relicense those third-party materials.
+
 ## Install a pinned source revision
 
 Use the full approved 40-character source commit, replacing `<SOURCE_SHA>` below. In the consumer's
@@ -152,9 +157,12 @@ This mode installs from the pinned public GitHub item, compares its payload with
 checks every installed file byte, and repeats the native and browser gates in a fresh consumer. Only a
 successful receipt with `publicInstallationVerified: true` satisfies the post-merge public-install gate.
 
-The local candidate CSS gate uses the sibling frontend-checks source CLI; its updated metadata,
-string-import and utility checks are not yet in published 0.1.1. Keep portable published consumer pins
-and record candidate verification separately; a local checker pass is not public release approval.
+All CSS gates use the installed official `@ztd-me/frontend-checks@0.1.3` CLI, and the harness pins
+`@ztd-me/eslint@0.1.4` for its strict type-alias policy. Both npm versions require owner promotion and
+fresh registry verification before installation and frozen-lock updates. Older checker versions lack
+the required metadata, string-import and utility checks. Do not patch the checker, replace its CLI
+with a local checkout, or add package extensions to supply runtime dependencies. A local source
+installation pass is not public release approval.
 
 The delivered `foundation.md` describes generic primitives and the host-injected i18n adapter. Configure
 application `@/*` aliases against its declared source root (normally `src`), and match compiler/bundler/

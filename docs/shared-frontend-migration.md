@@ -1,12 +1,16 @@
 # Source-owned UI integration
 
+Current source provenance and the verified 77-file inventory are defined in
+[the consumer foundation contract](consumer-foundation.md). Earlier acceptance
+records below describe their original test runs.
+
 Showcase installs editable `@ztd-me/ui` from approved tools source
-`7c708c0e0672a302cd751550276fb7a7a43cf1e5` through the public registry and real
+`9abea5a57b97f63109fb7dc5255543b53629c3ba` through the public registry and real
 `shadcn@4.21.1` CLI. `components.json` pins that full SHA; `ui-source.lock.json` records the
 public payload digest, 42 installed file digests, required dependency pins and reviewed local adaptation.
 No `@ztd-me/frontend` runtime package, Fontsource dependency or font binary remains.
 
-The fresh public installation matched all 42 approved payload files before adaptation, without
+The fresh public installation matched all 77 public payload files before adaptation, without
 replacing existing consumer files. Local adaptations change the README's plain JSX example fence
 from TSX to JSX, order its imports for project-aware Markdown lint, and use the Google API's variable
 weight range to avoid repeating identical font declarations. All TypeScript runtime source, other
