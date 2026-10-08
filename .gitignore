@@ -12,3 +12,4 @@ next-env.d.ts
 /.zt/browser/
 /.zt/unit/
 /.zt/font-preview/
+/.zt/foundation/
