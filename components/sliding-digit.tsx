@@ -11,6 +11,7 @@ const SLIDING_DIGIT_CLASS = [
 
 const DIGIT_FACE_CLASS = [
   'digit-face digit-out absolute [inset:0] flex items-center justify-center [will-change:transform]',
+  'motion-reduce:hidden',
 ].join(' ')
 
 const DIGIT_FACE_CLASS_1 = [

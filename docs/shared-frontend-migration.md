@@ -64,7 +64,8 @@ this change adds or relaxes no CSP, script/nonce policy, security setting or pro
 A future restrictive policy needs fonts.googleapis.com in style-src-elem (or style-src) and
 fonts.gstatic.com in font-src, subject to the consumer's own security approval.
 
-The appbar keeps 44px targets while its visible hover surface is compact. Shared borders are soft;
+The appbar uses the public Button ghost contract: 44px targets, 8px block padding,
+16px controls and a muted surface on hover/open that clears after close. Shared borders are soft;
 menus enter/exit with short directional motion and become noninteractive on exit. Reduced motion
 removes these menu animations and retains the existing clock fallback. Existing narrow navigation
 and fullscreen portal ownership remain local.
