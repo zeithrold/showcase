@@ -2,7 +2,7 @@ import type { ClockPreferences } from './clock'
 import type { ClockSettings } from './clock-settings'
 import { createContext, use } from 'react'
 
-export interface PreferencesContextValue {
+export type PreferencesContextValue = {
   preferences: ClockPreferences
   ready: boolean
   update: (values: Partial<ClockSettings>) => void

@@ -13,7 +13,7 @@ test('clock preferences still work when browser storage is unavailable', async (
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', /^\d{2}:\d{2}:\d{2}/)
   await selectAppearance(page, 'Dark')
   await selectAppearance(page, 'Ocean')
-  await expect(page.locator('html')).toHaveClass('dark')
+  await expect(page.locator('html')).toHaveClass(/(?:^|\s)dark(?:\s|$)/u)
   await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
   await page.getByRole('combobox', { name: 'Language', exact: true }).click()
   await page.getByRole('option', { name: '简体中文' }).click()

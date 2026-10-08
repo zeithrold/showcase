@@ -1,7 +1,7 @@
 import type { ClockSettings } from './clock-settings.ts'
 import { DEFAULT_CLOCK_SETTINGS, readClockSettings } from './clock-settings.ts'
 
-interface ClockStorage {
+type ClockStorage = {
   getItem: (key: string) => string | null
   setItem: (key: string, value: string) => void
 }

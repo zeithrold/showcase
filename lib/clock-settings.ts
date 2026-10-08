@@ -10,7 +10,7 @@ export const TIMEZONES = [
 
 export type Timezone = (typeof TIMEZONES)[number]['value']
 export type ClockFormat = '24' | '12'
-export interface ClockSettings {
+export type ClockSettings = {
   timezone: Timezone
   format: ClockFormat
   seconds: boolean

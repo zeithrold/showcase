@@ -1,13 +1,9 @@
 import type { Page } from '@playwright/test'
 
-declare global {
-  interface Window {
-    showcaseStorageAudit: {
-      reads: string[]
-      writes: string[]
-      records: () => Record<string, string | null>
-    }
-  }
+export type StorageAudit = {
+  reads: string[]
+  writes: string[]
+  records: () => Record<string, string | null>
 }
 
 export async function auditPreferenceStorage(page: Page, currentClock: boolean): Promise<void> {

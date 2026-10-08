@@ -43,6 +43,7 @@ for (const locale of ['en', 'zh-CN']) {
     if (locale === 'zh-CN') {
       await page.getByRole('combobox', { name: 'Language', exact: true }).click()
       await page.getByRole('option', { name: '简体中文' }).click()
+      await expect(page.getByRole('listbox')).toHaveCount(0)
     }
     await assertAccessible(page, testInfo, { label: `${locale}-mobile-clock` })
     await page.getByRole('button', { name: locale === 'en' ? 'About' : '关于', exact: true }).click()

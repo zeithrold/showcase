@@ -12,7 +12,7 @@ function server(environment: 'production' | 'preview', port: number): {
   reuseExistingServer: boolean
 } {
   return {
-    command: `pnpm start --port ${port} --var SHOWCASE_FRONTEND_ENVIRONMENT:${environment}`,
+    command: `pnpm start --inspector-port 0 --port ${port} --var SHOWCASE_FRONTEND_ENVIRONMENT:${environment}`,
     url: `http://localhost:${port}`,
     timeout: 60000,
     reuseExistingServer: false,

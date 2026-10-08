@@ -35,7 +35,7 @@ test('timezone, format, seconds, and theme controls work and persist', async ({ 
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '11:59 PM, Shanghai')
   await expect(page.locator('.sliding-digit')).toHaveCount(4)
   await selectAppearance(page, 'Dark')
-  await expect(page.locator('html')).toHaveClass('dark')
+  await expect(page.locator('html')).toHaveClass(/(?:^|\s)dark(?:\s|$)/u)
   const saved = await page.evaluate((): unknown => {
     return JSON.parse(localStorage.getItem('showcase.clock.settings.v1') ?? '{}')
   })
@@ -46,7 +46,7 @@ test('timezone, format, seconds, and theme controls work and persist', async ({ 
     seconds: false,
   })
   await page.reload()
-  await expect(page.locator('html')).toHaveClass('dark')
+  await expect(page.locator('html')).toHaveClass(/(?:^|\s)dark(?:\s|$)/u)
   await expect(page.locator('time.clock-digits')).toHaveAttribute('aria-label', '11:59 PM, Shanghai')
   await captureClockState(page, test.info(), 'dark')
 })
@@ -180,6 +180,6 @@ test('all six palettes change the page and clock in both light and dark modes', 
   await selectAppearance(page, 'Ocean')
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
-  await expect(page.locator('html')).toHaveClass('dark')
+  await expect(page.locator('html')).toHaveClass(/(?:^|\s)dark(?:\s|$)/u)
   await captureClockState(page, test.info(), 'ocean-dark')
 })

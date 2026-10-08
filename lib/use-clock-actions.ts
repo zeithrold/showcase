@@ -2,7 +2,7 @@ import type { ClockPreferences } from './clock'
 import { useEffect, useRef, useState } from 'react'
 import { formatClock } from './clock'
 
-interface FullscreenState {
+type FullscreenState = {
   focused: boolean
   stageElement: HTMLElement | null
   setStageElement: (element: HTMLElement | null) => void
@@ -48,7 +48,7 @@ export function useFullscreen(): FullscreenState {
 }
 
 type CopyStatus = '' | 'copied' | 'unavailable'
-interface ClipboardState {
+type ClipboardState = {
   copyStatus: CopyStatus
   copyTime: () => Promise<void>
 }

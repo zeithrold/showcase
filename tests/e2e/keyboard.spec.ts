@@ -103,5 +103,5 @@ test('an open select makes its hidden background inert and restores it on dismis
   await expect(timezone).toBeFocused()
   await expect(page.locator('[inert]')).toHaveCount(0)
   await selectAppearance(page, 'Dark')
-  await expect(page.locator('html')).toHaveClass('dark')
+  await expect(page.locator('html')).toHaveClass(/(?:^|\s)dark(?:\s|$)/u)
 })
