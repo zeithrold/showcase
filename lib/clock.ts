@@ -5,10 +5,10 @@ import type { Locale } from './i18n.ts'
 export type { ClockFormat, ClockSettings, Timezone } from './clock-settings.ts'
 export { DEFAULT_CLOCK_SETTINGS, isTimezone, readClockSettings, TIMEZONES } from './clock-settings.ts'
 
-export interface ClockPreferences extends ClockSettings, Pick<FrontendPreferences, 'locale' | 'palette'> {
+export type ClockPreferences = ClockSettings & Pick<FrontendPreferences, 'locale' | 'palette'> & {
   theme: 'light' | 'dark'
 }
-export interface ClockParts {
+export type ClockParts = {
   hour: string
   minute: string
   second: string

@@ -1,7 +1,7 @@
 import type { CDPSession, Page } from '@playwright/test'
 
-interface Face { family: string, weight?: string }
-export interface FontResource {
+type Face = { family: string, weight?: string }
+export type FontResource = {
   url: string
   kind: 'font' | 'font-css'
   status: number
@@ -10,7 +10,7 @@ export interface FontResource {
   httpDecodedBodyBytes?: number
   faces: Face[]
 }
-interface Phase {
+type Phase = {
   responses: Map<string, Omit<FontResource, 'faces'>>
   cached: Set<string>
   bodies: Promise<void>[]

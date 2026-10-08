@@ -18,7 +18,7 @@ for (const { scenario, route, locale, coldCap } of [
       {
         name: COOKIE_NAME,
         value: encodeURIComponent(JSON.stringify({ version: 1, mode: 'light', palette: 'neutral', locale })),
-        url: 'http://localhost:4173',
+        url: info.project.use.baseURL ?? 'http://localhost:4173',
       },
     ])
     const sample = await createFontProfiler(page)

@@ -38,7 +38,7 @@ test('appearance changes preserve clock controls through navigation and reload',
   await expect(page.getByRole('switch', { name: '显示秒数', exact: true })).not.toBeChecked()
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
   await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'ocean')
-  await expect(page.locator('html')).toHaveClass('dark')
+  await expect(page.locator('html')).toHaveClass(/(?:^|\s)dark(?:\s|$)/u)
   expect(errors).toEqual([])
   await captureClockState(page, testInfo, 'clock-controls-after-appearance-change')
 })

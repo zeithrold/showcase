@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: (process.env.SHOWCASE_TEST_URL ?? '') !== ''
     ? undefined
     : {
-        command: 'pnpm start --port 4173',
+        command: 'pnpm start --inspector-port 0 --port 4173',
         url: 'http://localhost:4173',
         reuseExistingServer: (process.env.CI ?? '') === '',
         timeout: 60000,
