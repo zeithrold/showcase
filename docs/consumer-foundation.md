@@ -15,10 +15,13 @@ the lockfile for the official Tools packages.
 
 `lib/locales/` owns the typed English/Chinese dictionaries. `lib/i18n.ts` owns the request-local factory, typed keys (including valid plural base keys), and locale bridge. `components/i18n-provider.tsx` creates exactly one instance per root. `components/i18n/use-site-translation.ts` supplies typed application translation calls against the existing FrontendProvider locale; clock business preferences and fullscreen portal ownership are preserved.
 
-Consumer object contracts use TypeScript `type` aliases. The official `@ztd-me/eslint@0.1.4` package enforces
+Consumer object contracts use TypeScript `type` aliases. The official `@ztd-me/eslint@0.1.5` package enforces
 `ts/consistent-type-definitions: ["error", "type"]`. Required native/global declaration merging remains interface-based in
 handwritten declaration files; its rule remains enforced. Generated declarations and
 pinned source delivery are separate provenance boundaries.
+JavaScript source uses the native ESLint unused-variable rule so Espree value
+references stay valid across TypeScript ESLint updates. Typed source retains the
+TypeScript rule, and unused imports remain errors in both scopes.
 
 This work preserves the current `app/`, `components/`, `lib/`, and `tests/` roots.
 New translation behavior stays in named i18n modules and hooks; visual roles and
