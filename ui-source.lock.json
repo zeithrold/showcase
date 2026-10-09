@@ -112,7 +112,7 @@
     "kind": "verified-public-source",
     "sourceSha": "9abea5a57b97f63109fb7dc5255543b53629c3ba",
     "registryItemSha256": "0ea6c065dc4da6608fb8b2beb817b8607c03ad694f40af1a49160971c804ddd4",
-    "inventorySha256": "7942773fb2398868803eb26bdd3d8feeb13fb96805d12d39c08c3564e7b71807",
+    "inventorySha256": "69f531ccc7cbf48136977cacb459fb9db62536cbdba4d71468d8bdc9f74c351c",
     "publicInstallationVerified": true,
     "dependencies": [
       "react@19.3.0",
@@ -358,7 +358,8 @@
       {
         "path": "components/ui/ztd-me/styles/primitives.css",
         "upstreamSha256": "011617b8e6351955b99556358ad9bd073fba090096f8073c413043cd019d7579",
-        "sha256": "011617b8e6351955b99556358ad9bd073fba090096f8073c413043cd019d7579"
+        "sha256": "b609a5085024ee20eb1ac148fd27bbf288f75735614311ff99f1ebfb9a07ac92",
+        "adaptation": "Keep dialog centering in Tailwind v4 individual translate; animate opacity and scale to prevent duplicate translation and opening or closing position jumps."
       },
       {
         "path": "components/ui/ztd-me/ui/accordion.tsx",
