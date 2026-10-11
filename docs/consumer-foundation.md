@@ -1,9 +1,9 @@
 # Consumer typography and translation foundation
 
-Ordinary Noto text uses shared configurable roles: `--ztd-font-body` (18px),
-`--ztd-font-control` (16px), and `--ztd-font-help` (14px). Product styles include
+Ordinary Noto text uses shared configurable roles: `--ztd-font-body` (15px),
+`--ztd-font-control` (13px), and `--ztd-font-help` (12px). Product styles include
 explicit fallback sizes alongside the verified public shared source.
-Small metadata and diagram labels no longer shrink to 6–13px on narrow screens.
+Compact metadata uses the shared help role consistently across viewport sizes.
 Brand titles, clock digits, and intentional illustration sizes retain their display roles.
 Tailwind utilities now own consumer layout and control sizing, while shared tokens and
 primitives come from the complete Tools source inventory. Product CSS retains clock
@@ -43,11 +43,18 @@ the checked-in receipt hash.
 The source guard checks that receipt, upstream and installed hashes, the complete
 inventory digest, reviewed adaptations, atomic delivery and exact dependency pins.
 It rejects altered bytes, extra files, changed inventory digests and unverified
-installation claims. The installed graph is a verified public source rather than a
-local candidate. Source updates require a new verified full commit and reviewed
-inventory; normal checks use the committed evidence without network access.
+installation claims. The public receipt verifies the accepted upstream base; the installation inventory
+also identifies reviewed local adaptations. Updating the public source pin requires
+a new verified full commit and reviewed inventory. Normal checks verify the
+committed provenance and installed hashes without network access.
 
-All 77 delivered files match the public graph without local adaptations. The
+Seven reviewed source adaptations synchronize the local Tools typography contract:
+body/control/help/heading 15/13/12/19px, reading prose 17px and editable fields
+16px. Tokens, the Tailwind bridge, class merging, fields and delivered guidance
+move together; dialog animation preserves Tailwind centering. Root/rem sizing
+and touch targets remain unchanged. The public pin and receipt identify the
+accepted upstream base, while local adaptation hashes identify the installed
+changes. The other 70 delivered files match that public base. The
 published `@ztd-me/frontend-checks@0.1.3` validates static Tailwind utilities,
 class composition, CSS imports and token contracts. No Tools-owned npm package
 patch or package extension is installed. Radix and Vaul retain the reviewed

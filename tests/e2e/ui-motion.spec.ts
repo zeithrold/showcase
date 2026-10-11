@@ -26,7 +26,7 @@ test('compact appbar keeps full targets and animated menus restore keyboard focu
   expect(chrome.background).toBe('rgba(0, 0, 0, 0)')
   expect(chrome.border).toBe('rgba(0, 0, 0, 0)')
   expect(chrome.padding).toBe('8px')
-  expect(chrome.fontSize).toBe('16px')
+  expect(chrome.fontSize).toBe('13px')
   await expect(page.locator('html')).toHaveAttribute('data-frontend-palette', 'neutral')
   await appearance.hover()
   await expect(appearance).toHaveCSS('background-color', 'rgb(240, 240, 240)')
