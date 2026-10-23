@@ -10,7 +10,7 @@ reduced-motion behavior, and saved `showcase.clock.v1` preferences.
 
 The directory is an exhibit of usable tools. Its clock preview uses the same sliding-digit primitive as the clock page, current local time and actual day progress. Initial placeholders match server and client; the timer starts after hydration. The entire exhibit remains one named link. Its dial and duplicate display are decorative to assistive technology.
 
-Ordinary body/control/help roles are 15/13/12px. The directory title caps at 50px on wide English layouts and 36px on narrow layouts; Chinese caps at 48/34px. The tool page title uses 36/30px. The functional time display is a separate numeric role capped at 124px outside fullscreen; fullscreen retains its viewing-distance scale. Compact text retains 44px control targets. Six palettes, visible focus, reduced motion and native layout reflow apply to the whole flow.
+Ordinary body/control/help roles are 15/13/12px. The directory title caps at 50px on wide English layouts and 36px on narrow layouts; Chinese caps at 48/34px. The tool page title uses 36/30px. The functional time display is a separate numeric role capped at 124px outside fullscreen; fullscreen retains its viewing-distance scale. Compact text retains 44px control targets. Six palettes, visible focus, reduced motion and native layout reflow apply to the whole flow. Missing routes retain the same shell, locale and palette, with a compact 32/26px recovery title and a 44px return link.
 
 ## Tokens and components
 

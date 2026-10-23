@@ -89,6 +89,8 @@ export const en = {
   'notes.everydayBody':
     'Find your timezone. Go fullscreen. Make it yours. Your preferences stay with you, for '
     + 'the next time you drop by.',
+  'notfound.title': 'Page not found.',
+  'notfound.description': 'Explore the collection to find a tool.',
   'footer.credit': 'Thoughtfully put together by',
   'footer.source': 'GitHub repository',
   'footer.progress': 'Always a work in progress.',

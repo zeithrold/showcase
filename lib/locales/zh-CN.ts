@@ -81,6 +81,8 @@ export const zhCN = {
   'notes.everydayIndex': '02 / 日常',
   'notes.everydayTitle': '留一小片空间，慢下来。',
   'notes.everydayBody': '选一个时区，进入全屏，调一组喜欢的颜色。偏好会留在浏览器里，等你下次再来。',
+  'notfound.title': '没有找到这一页。',
+  'notfound.description': '可以返回页面目录，选择一个工具。',
   'footer.credit': '用心设计与开发',
   'footer.source': 'GitHub 仓库',
   'footer.progress': '持续打磨，慢慢生长。',
