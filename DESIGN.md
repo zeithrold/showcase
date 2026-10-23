@@ -26,10 +26,15 @@ Open selects make Radix-hidden background regions inert and restore only the ine
 own on close, preserving existing inert regions. Native Slot composition preserves forwarded
 refs and React 19 cleanup callbacks. Components do not replace those choices with a shared theme.
 
+For visual refinement, use the installed
+[UI foundation](.agents/skills/ui-foundation/SKILL.md) and its
+[eight-dimension review](.agents/skills/ui-foundation/references/visual-design.md).
+This contract supplies the local concept, type budgets, real clock behavior and evidence limits.
+
 ## Verification and evidence
 
 `pnpm check` runs the required `zt.json` frontend profile once. Its leaf commands never call
-`check`. Strict ESLint 0.1.1, CSS syntax/token validation, TypeScript, unit tests and the Worker
+`check`. Strict ESLint 0.1.5, CSS syntax/token validation, TypeScript, unit tests and the Worker
 build precede Chromium regressions and a separate Axe suite. No accessibility findings are
 ignored and the helper's default WCAG A/AA tags remain enabled.
 

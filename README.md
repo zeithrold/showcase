@@ -24,7 +24,7 @@ pnpm deploy
 Install the reviewed `zt` CLI with Go 1.27.1 (or a compatible Go toolchain):
 
 ```sh
-go install github.com/zeithrold/tools/cmd/zt@3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f
+go install github.com/zeithrold/tools/cmd/zt@405d732ed93488ff08568751e522c42537480752
 zt sync --root . --plan
 zt sync --root .
 pnpm check
@@ -33,7 +33,13 @@ pnpm check
 `zt.json` maps the frontend profile to required native lint, CSS, typecheck, unit, build, browser regression, accessibility/fonts and failure-evidence integration commands. `pnpm check` runs that profile once without recursion or repeated browser cases. Chromium must be installed first. Regression tests and Axe scans use separate artifact subdirectories; `pnpm test:e2e` runs both suites together when requested. `zt` retains command logs and its structured report under `.zt/artifacts/<run>/`, together with CSS results, full Axe JSON, HTML/JSON browser reports, named state captures and failure traces/screenshots/videos. The required integration gate runs `pnpm test:evidence`, which deliberately
 fails an isolated unnamed-button fixture and verifies retained evidence and stopped later gates. It can also run independently after a build. CI uploads this directory even when verification fails.
 
-The five managed Skills directories and `zt.lock.json` come from the same reviewed tools commit. Preview sync before applying it; the CLI refuses to overwrite unmanaged files or local edits. See [DESIGN.md](DESIGN.md) for this application's design and verification contract.
+The five managed development Skills and `zt.lock.json` come from Tools
+`405d732ed93488ff08568751e522c42537480752`. Preview sync before applying it; the CLI protects local edits.
+CI's check runner remains pinned to `3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f` and does not sync Skills.
+Read [DESIGN.md](DESIGN.md) and the installed
+[visual review workflow](.agents/skills/ui-foundation/references/visual-design.md)
+before refining the directory or clock. The clock's numeric display has its own local
+budget; shared body/control/help roles do not determine its viewing-distance scale.
 
 The published `@ztd-me/frontend-checks@0.1.3` helper and compatible `@playwright/test@1.62.0` are pinned. CSS checks enforce native syntax, semantic paint tokens, and defined custom property references. Browser checks scan both routes in every light/dark palette, translated mobile dialogs and menus, and exercise keyboard navigation and focus restoration. Captured screenshots are evidence; visual baselines and performance budgets remain deferred. The workspace enables pnpm's portable shell, release-age exclusion pruning, and `trustPolicy: no-downgrade`; the approved `@ztd-me/*` scope is exempted from the release-age gate only. The approved trust exception covers only `semver@6.3.1`, which Babel 7 requires and which lacks provenance. Build-script permission remains limited to `esbuild` and `workerd` through pnpm 11's `allowBuilds` configuration.
 
@@ -73,9 +79,9 @@ The homepage is a directory of individual pages. `lib/pages.ts` defines the page
 - Preferences persist in browser storage, with validation and graceful handling of unavailable storage.
 - Keyboard-accessible Shadcn controls and support for reduced motion.
 - English and Simplified Chinese with i18next/react-i18next, browser language detection, localized dates, and saved language preference.
-- Five complete color palettes (Terracotta, Moss, Ocean, Plum, Graphite), each with light/dark variants.
+- Six complete color palettes (Neutral, Terracotta, Moss, Ocean, Plum, Graphite), each with light/dark variants.
 
-The published `@ztd-me/eslint@0.1.1` config enables strict, type-aware TypeScript and React checks. Its explicit `react: { framework: 'vinext' }` profile recognizes server page/layout exports while retaining export checks on ordinary and client components. `eslint.config.js` excludes generated build and framework files only; application, configuration, verification scripts, and tests are linted. TypeScript enables `strict` and `noUncheckedIndexedAccess`. ESLint 10.11.0 and TypeScript 6.0.3 are pinned to the package's declared peer versions.
+The published `@ztd-me/eslint@0.1.5` config enables strict, type-aware TypeScript and React checks. Its explicit `react: { framework: 'vinext' }` profile recognizes server page/layout exports while retaining export checks on ordinary and client components. `eslint.config.js` excludes generated build and framework files only; application, configuration, verification scripts, and tests are linted. TypeScript enables `strict` and `noUncheckedIndexedAccess`. ESLint 10.11.0 and TypeScript 6.0.3 are pinned to the package's declared peer versions.
 
 `components/page-directory.tsx` renders the homepage. `components/site-shell.tsx` supplies shared navigation; `components/preferences-provider.tsx` synchronizes saved preferences through the per-app store in `lib/preferences-store.ts`, with a stable server snapshot for hydration. `components/sliding-digit.tsx` implements the motion and `components/clock-page.tsx` composes the clock view and controls from `components/clock/`; `lib/use-current-time.ts` owns the synchronized timer and visibility subscription, and `lib/use-clock-actions.ts` owns clipboard status and fullscreen behavior. `lib/clock.ts` contains timezone formatting and preference validation. Translation resources live in `lib/locales/`; `components/i18n-provider.tsx` creates an isolated i18next instance for each rendered app. Tests cover directory navigation, cross-page preferences, rollover, noon/midnight, daylight saving offsets, motion, controls, persistence, fullscreen, localization, all color palettes, zero glyph clipping, and responsive layouts.
 
