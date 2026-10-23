@@ -14,8 +14,8 @@ import { useCopyTime, useFullscreen } from '@/lib/use-clock-actions'
 import { useCurrentTime } from '@/lib/use-current-time'
 
 const CLOCK_STAGE_CLASS = [
-  'clock-stage relative overflow-hidden bg-card border border-border rounded-[20px]',
-  'shadow-[0_8px_40px_var(--clock-shadow)] max-[520px]:rounded-[14px]',
+  'clock-stage relative overflow-hidden bg-card border border-border rounded-sm',
+  'shadow-[0_8px_40px_var(--clock-shadow)] max-[520px]:rounded-sm',
 ].join(' ')
 
 const CLOCK_TOPLINE_CLASS = [

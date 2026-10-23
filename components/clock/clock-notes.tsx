@@ -12,13 +12,13 @@ const NOTE_INDEX_CLASS = ['note-index text-muted-foreground text-help tracking-[
 const NOTE_INDEX_CLASS_2 = ['note-index text-muted-foreground text-help tracking-[1.1px]'].join(' ')
 
 const TOOL_INTRO_CLASS = [
-  'tool-intro pt-9 px-0 pb-10 [&_.intro-eyebrow]:mb-[13px] [&_h1]:text-[length:44px]',
-  '[&_h1]:tracking-[-1.8px] max-[760px]:[&_h1]:text-[length:38px] max-[520px]:[&_h1]:text-[length:34px]',
+  'tool-intro pt-9 px-0 pb-10 [&_.intro-eyebrow]:mb-[13px] [&_h1]:text-[length:36px]',
+  '[&_h1]:tracking-[-.035em] max-[760px]:[&_h1]:text-[length:34px] max-[520px]:[&_h1]:text-[length:30px]',
   'max-[520px]:pt-[25px] max-[520px]:px-0 max-[520px]:pb-[30px]',
 ].join(' ')
 
 const BACK_LINK_CLASS = [
-  'back-link inline-flex items-center gap-2 text-control text-muted-foreground hover:text-accent',
+  'back-link inline-flex min-h-11 items-center gap-2 text-control text-muted-foreground hover:text-accent',
 ].join(' ')
 
 const TOOL_INTRO_BODY_CLASS = [

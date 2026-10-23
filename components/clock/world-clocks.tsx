@@ -9,16 +9,13 @@ const MINI_DIAL_CLASS = [
 ].join(' ')
 
 const WORLD_CLOCKS_CLASS = [
-  'world-clocks grid grid-cols-[130px_1fr_1fr_1fr] items-center gap-8 py-[25px] px-7 border-b',
-  'border-border max-[1050px]:grid-cols-[110px_1fr_1fr_1fr] max-[1050px]:gap-5 max-[760px]:py-[23px]',
-  'max-[760px]:px-[14px] max-[520px]:py-5 max-[520px]:px-[2px] max-[520px]:gap-[13px]',
-  'max-[760px]:grid-cols-[repeat(auto-fit,_minmax(150px,_1fr))] max-[760px]:gap-5',
-  'max-[520px]:grid-cols-[minmax(0,_1fr)]',
+  'world-clocks grid grid-cols-[repeat(auto-fit,_minmax(min(100%,_280px),_1fr))] gap-x-6 gap-y-5',
+  'py-6 px-7 border-b border-border max-[760px]:px-4 max-[520px]:px-0',
 ].join(' ')
 
 const WORLD_CAPTION_CLASS = [
-  'world-caption text-help tracking-[1.2px] leading-[1.7] text-muted-foreground whitespace-pre-line',
-  'max-[760px]:hidden',
+  'world-caption col-span-full text-help tracking-[.1em] leading-[1.7] text-muted-foreground',
+  'whitespace-pre-line max-[760px]:hidden',
 ].join(' ')
 
 const WORLD_CLOCK_CLASS = [
@@ -63,7 +60,7 @@ function MiniDial({ hour, minute }: { hour: number, minute: number }): JSX.Eleme
         strokeLinecap="round"
         transform={`rotate(${minute * 6} 16 16)`}
       />
-      <circle cx="16" cy="16" r="1.5" fill="var(--accent-color)" />
+      <circle cx="16" cy="16" r="1.5" fill="var(--ztd-accent)" />
     </svg>
   )
 }
