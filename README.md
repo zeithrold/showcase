@@ -24,7 +24,7 @@ pnpm deploy
 Install the reviewed `zt` CLI with Go 1.27.1 (or a compatible Go toolchain):
 
 ```sh
-go install github.com/zeithrold/tools/cmd/zt@405d732ed93488ff08568751e522c42537480752
+go install github.com/zeithrold/tools/cmd/zt@880e26363c8a3ec35c1e316edb30780c33bcecbc
 zt sync --root . --plan
 zt sync --root .
 pnpm check
@@ -34,7 +34,7 @@ pnpm check
 fails an isolated unnamed-button fixture and verifies retained evidence and stopped later gates. It can also run independently after a build. CI uploads this directory even when verification fails.
 
 The five managed development Skills and `zt.lock.json` come from Tools
-`405d732ed93488ff08568751e522c42537480752`. Preview sync before applying it; the CLI protects local edits.
+`880e26363c8a3ec35c1e316edb30780c33bcecbc`. Preview sync before applying it; the CLI protects local edits.
 CI's check runner remains pinned to `3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f` and does not sync Skills.
 Read [DESIGN.md](DESIGN.md) and the installed
 [visual review workflow](.agents/skills/ui-foundation/references/visual-design.md)
