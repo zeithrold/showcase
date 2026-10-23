@@ -2,6 +2,7 @@
 
 import type { JSX, ReactNode } from 'react'
 import type { LinkProps } from './ui/ztd-me/index.ts'
+import { Info } from 'lucide-react'
 import Link from 'next/link'
 import { useSiteTranslation } from '@/components/i18n/use-site-translation'
 import { ShowcaseMark } from '@/components/showcase-mark'
@@ -20,6 +21,13 @@ const MOBILE_PROJECT_ACTIONS_CLASS = [
   'max-[639.99px]:[&_.project-actions]:justify-end',
 ].join(' ')
 
+const BRAND_CLASS = ['max-[639.99px]:[&>.brand-mark]:hidden max-[639.99px]:[&>span]:whitespace-nowrap'].join(' ')
+
+const PERSISTENCE_NOTICE_CLASS = [
+  'persistence-notice flex items-start gap-2.5 border-l-2 border-border mt-4 pl-3 py-1',
+  'text-help text-muted-foreground leading-[1.7]',
+].join(' ')
+
 export { IconButton } from '@/components/icon-button'
 
 function ProjectLink(props: LinkProps): JSX.Element {
@@ -33,6 +41,7 @@ export function SiteShell({ children, directory = false }: { children: ReactNode
   return (
     <PublicShell
       brand={{ label: 'zeithrold/showcase', homeHref: '/', mark: <ShowcaseMark /> }}
+      brandClassName={BRAND_CLASS}
       footer={{
         copyright: '© Zeithrold',
         links: [
@@ -48,7 +57,12 @@ export function SiteShell({ children, directory = false }: { children: ReactNode
         <div className={MOBILE_PROJECT_ACTIONS_CLASS}>
           <ProjectActions directory={directory} />
         </div>
-        {persistence === 'unavailable' && <p role="status">{t('settings.persistenceUnavailable')}</p>}
+        {persistence === 'unavailable' && (
+          <div className={PERSISTENCE_NOTICE_CLASS} role="status">
+            <Info size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
+            <p className="m-0">{t('settings.persistenceUnavailable')}</p>
+          </div>
+        )}
         {children}
       </div>
     </PublicShell>

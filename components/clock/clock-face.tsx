@@ -18,9 +18,9 @@ const CLOCK_COLON_CLASS = [
 
 const CLOCK_DIGITS_CLASS = [
   'clock-digits flex justify-center items-center relative w-[fit-content] max-w-full mt-[17px] mx-auto',
-  'mb-[9px] font-sans text-[length:clamp(92px,_11.8vw,_164px)] font-normal tabular-nums',
-  'text-[var(--clock-color)] tracking-[0] leading-[1.12] max-[760px]:text-[length:11.9vw]',
-  'max-[520px]:text-[length:15.8vw] max-[520px]:font-normal max-[520px]:mt-5 max-[520px]:mx-auto',
+  'mb-[9px] font-sans text-[length:clamp(72px,_9vw,_124px)] font-normal tabular-nums',
+  'text-[var(--clock-color)] tracking-[0] leading-[1.12] max-[760px]:text-[length:11.5vw]',
+  'max-[520px]:text-[length:15vw] max-[520px]:font-normal max-[520px]:mt-5 max-[520px]:mx-auto',
   'max-[520px]:mb-3',
 ].join(' ')
 
