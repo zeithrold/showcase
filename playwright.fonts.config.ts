@@ -2,8 +2,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { defineConfig } from '@playwright/test'
 import { verificationArtifacts } from '@ztd-me/frontend-checks/playwright'
+import { fontPort, workerStart } from './tests/test-ports'
 
-const fontPort = Number(process.env.SHOWCASE_FONT_TEST_PORT ?? 4173)
 const fontOrigin = `http://localhost:${fontPort}`
 
 const artifacts = verificationArtifacts(path.join(process.env.ZT_ARTIFACTS_DIR ?? '.zt/browser', 'fonts'))
@@ -19,7 +19,7 @@ export default defineConfig({
     timezoneId: 'Asia/Shanghai',
   },
   webServer: {
-    command: `pnpm start --inspector-port 0 --port ${fontPort}`,
+    command: workerStart(fontPort),
     url: fontOrigin,
     timeout: 60000,
     reuseExistingServer: false,

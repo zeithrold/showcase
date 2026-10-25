@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 import { assertAccessible, captureState } from '@ztd-me/frontend-checks/playwright'
 import { test } from '../browser-test'
-import { openClock, selectAppearance } from './helpers'
+import { openClock, openPageIndex, selectAppearance } from './helpers'
 
 const palettes = [
   'Neutral',
@@ -12,14 +12,16 @@ const palettes = [
   'Graphite',
 ]
 
-for (const route of ['/', '/clock']) {
+for (const route of ['/', '/clock'] as const) {
   for (const theme of ['light', 'dark']) {
     test(`@a11y ${route} all palettes in ${theme}`, async ({ page }, testInfo) => {
-      await openClock(page)
-      await page.clock.setFixedTime(await page.evaluate(() => Date.now()))
-      await page.clock.resume()
-      if (route === '/') {
-        await page.goto('/')
+      if (route === '/clock') {
+        await openClock(page)
+        await page.clock.setFixedTime(await page.evaluate(() => Date.now()))
+        await page.clock.resume()
+      }
+      else {
+        await openPageIndex(page)
       }
       if (theme === 'dark') {
         await selectAppearance(page, 'Dark')
