@@ -46,10 +46,26 @@ It is no longer a separate workflow command. Required native failure stops later
 them as `not_run`. The diagnostic step reads existing failed/blocked logs, without rerunning them
 or clearing the failed status. It excludes the nested deliberate-failure reports.
 
+The `e2e` and `a11y` gates each run two independent native suites. The project composes them
+with pnpm itself (`pnpm run --no-bail '/^test:(…)$/'`), so pnpm owns process startup, per-script
+log prefixes and failure aggregation: `--no-bail` keeps a failing suite from stopping the other, and
+each suite still keeps its own config, artifact subdirectory, port and Worker `--persist-to`
+directory. The regex is single-quoted because the emulated shell expands `$` inside double quotes.
+This is a startup and scheduling change only: no case, Axe scan, capture, retry or budget is
+removed. `SHOWCASE_TEST_URL` behaves as before: the regression and Axe suites then use that existing
+Worker, while the preference boundaries keep their own local pair. The evidence validator accepts
+attachments whether the shared helper inlines them or attaches complete files, resolves each path
+once (absolute as given, relative from this run's artifact root, realpath confined to that root),
+and rejects empty, truncated, externally linked or missing artifacts either way.
+
 Showcase retains one additional failure-only step after diagnostics: an independent production
 build and real Google Fonts check when a native prerequisite fails. This provides font evidence
 without bypassing that failure. The required ordinary English/Chinese cold and warm budgets and
 multilingual glyph, weight, composed-emoji, CSP and request-count checks remain in the native suite.
+Font samples settle on their own tracked font/font-CSS requests instead of a network-idle window, and
+every wait shares one settlement deadline, so a stalled font file or stylesheet fails the suite
+within that deadline instead of hanging it; `tests/fonts/settlement-guard.spec.ts` holds each request
+shape with a short deadline to prove the failure stays bounded.
 
 Build artifacts use `worker-${github.sha}`. Evidence uses
 `frontend-${github.run_id}-${github.run_attempt}` and uploads on success or failure. Both retain

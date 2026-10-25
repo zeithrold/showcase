@@ -55,7 +55,7 @@ move together; dialog animation preserves Tailwind centering. Root/rem sizing
 and touch targets remain unchanged. The public pin and receipt identify the
 accepted upstream base, while local adaptation hashes identify the installed
 changes. The other 70 delivered files match that public base. The
-published `@ztd-me/frontend-checks@0.1.3` validates static Tailwind utilities,
+published `@ztd-me/frontend-checks@0.1.4` validates static Tailwind utilities,
 class composition, CSS imports and token contracts. No Tools-owned npm package
 patch or package extension is installed. Radix and Vaul retain the reviewed
 third-party compatibility patches.

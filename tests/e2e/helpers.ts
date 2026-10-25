@@ -27,6 +27,13 @@ export async function openClock(page: Page, time = instant): Promise<void> {
   )
 }
 
+// The `/` counterpart of `openClock`: same shared preferences, no clock to install.
+export async function openPageIndex(page: Page): Promise<void> {
+  await setSharedCookie(page.context(), { version: 1, mode: 'light', locale: 'en', palette: 'terracotta' })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Pages', exact: true })).toBeVisible()
+}
+
 export function watchErrors(page: Page): string[] {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
