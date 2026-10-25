@@ -26,9 +26,9 @@ Open selects make Radix-hidden background regions inert and restore only the ine
 own on close, preserving existing inert regions. Native Slot composition preserves forwarded
 refs and React 19 cleanup callbacks. Components do not replace those choices with a shared theme.
 
-For visual refinement, use the installed
-[UI foundation](.agents/skills/ui-foundation/SKILL.md) and its
-[eight-dimension review](.agents/skills/ui-foundation/references/visual-design.md).
+For visual refinement, use the globally installed
+[UI foundation](https://github.com/zeithrold/tools/blob/7fd78ba96830452502adbda07575bb250af914ba/skills/ui-foundation/SKILL.md) and its
+[eight-dimension review](https://github.com/zeithrold/tools/blob/7fd78ba96830452502adbda07575bb250af914ba/skills/ui-foundation/references/visual-design.md).
 This contract supplies the local concept, type budgets, real clock behavior and evidence limits.
 
 ## Verification and evidence

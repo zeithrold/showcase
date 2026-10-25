@@ -25,19 +25,21 @@ Install the reviewed `zt` CLI with Go 1.27.1 (or a compatible Go toolchain):
 
 ```sh
 go install github.com/zeithrold/tools/cmd/zt@7fd78ba96830452502adbda07575bb250af914ba
-zt sync --root . --plan
-zt sync --root .
 pnpm check
 ```
 
 `zt.json` maps the frontend profile to required native lint, CSS, typecheck, unit, build, browser regression, accessibility/fonts and failure-evidence integration commands. `pnpm check` runs that profile once without recursion or repeated browser cases. Chromium must be installed first. Regression tests and Axe scans use separate artifact subdirectories; `pnpm test:e2e` runs both suites together when requested. The `e2e` and `a11y` gates run their two suites concurrently with `pnpm run --no-bail '/^test:(…)$/'`: pnpm owns the process lifecycle and prefixes every line with the script name, each suite keeps its own config and artifact subdirectory, and a failing suite no longer stops the other from finishing. The regex is single-quoted because the emulated shell expands `$` inside double quotes. `SHOWCASE_TEST_PORT` moves the base port (default 4173); the font and preference Workers derive `+1`, `+2` and `+3` from it, and `SHOWCASE_FONT_TEST_PORT`, `SHOWCASE_PRODUCTION_TEST_PORT` and `SHOWCASE_PREVIEW_TEST_PORT` still override a single suite. Every started Worker also gets `--persist-to .wrangler/test-<port>`, so concurrent Workers cannot collide on one state database. `zt` retains command logs and its structured report under `.zt/artifacts/<run>/`, together with CSS results, full Axe JSON, HTML/JSON browser reports, per-suite `test-timings.json`, named state captures and failure traces/screenshots/videos, with attachments retained as complete files instead of inline payloads. The required integration gate runs `pnpm test:evidence`, which deliberately
 fails an isolated unnamed-button fixture and verifies retained evidence and stopped later gates. It can also run independently after a build. CI uploads this directory even when verification fails.
 
-The five managed development Skills and `zt.lock.json` come from Tools
-`7fd78ba96830452502adbda07575bb250af914ba`. Preview sync before applying it; the CLI protects local edits.
+The five generic development Skills come from Tools
+[`7fd78ba96830452502adbda07575bb250af914ba`](https://github.com/zeithrold/tools/tree/7fd78ba96830452502adbda07575bb250af914ba/skills)
+and are installed once for the current user in `~/.agents/skills`; this repository keeps no copy.
+Selection lives in the user-global `~/.agents/zt.json` or an explicit `zt sync --skills` list for
+the new global `zt sync` in the Tools source working tree, which has no released build yet, so
+the `zt` pin above only runs the native profile. `zt.lock.json` stays as an empty retired lock.
 CI's check runner remains pinned to `3f9a3a7d33befc5a954ba1e86d3aa6d72e2c762f` and does not sync Skills.
-Read [DESIGN.md](DESIGN.md) and the installed
-[visual review workflow](.agents/skills/ui-foundation/references/visual-design.md)
+Read [DESIGN.md](DESIGN.md) and `ui-foundation`'s global
+[visual review workflow](https://github.com/zeithrold/tools/blob/7fd78ba96830452502adbda07575bb250af914ba/skills/ui-foundation/references/visual-design.md)
 before refining the directory or clock. The clock's numeric display has its own local
 budget; shared body/control/help roles do not determine its viewing-distance scale.
 
